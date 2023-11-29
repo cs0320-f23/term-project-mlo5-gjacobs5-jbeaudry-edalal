@@ -5,6 +5,7 @@ import com.squareup.moshi.Moshi;
 import edu.brown.cs.student.main.server.Data.BUSRoute;
 import edu.brown.cs.student.main.server.Data.BUSRouteStopMapping;
 import edu.brown.cs.student.main.server.Data.BUSStops;
+import edu.brown.cs.student.main.server.Data.BUSVehicleData;
 import edu.brown.cs.student.main.server.Exceptions.ShuttleDataException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -12,6 +13,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -147,6 +149,62 @@ public class TransLocAPISource implements APISource {
     }
 
     return Collections.emptyList();
+  }
+
+  public List<BUSVehicleData.Vehicle> getVehicleData() throws ShuttleDataException {
+    try {
+      Object response =
+          deserializeTransLocData("https://feeds.transloc.com/3/vehicle_statuses?agencies=635");
+
+      if (response instanceof Map) {
+        Map<String, Object> jsonResponse = (Map<String, Object>) response;
+        List<Map<String, Object>> vehiclesDataList =
+            (List<Map<String, Object>>) jsonResponse.get("vehicles");
+
+        List<BUSVehicleData.Vehicle> vehicleData =
+            (List<BUSVehicleData.Vehicle>) (List<?>) vehiclesDataList;
+
+        return vehicleData;
+      }
+    } catch (IOException e) {
+      throw new ShuttleDataException(e.getMessage());
+    }
+
+    return Collections.emptyList();
+  }
+
+  public List<Map<String, Object>> parseVehicleData(List<BUSVehicleData.Vehicle> data) {
+    String input = data.toString();
+
+    String[] keyValuePairs = input.substring(1, input.length() - 1).split(", ");
+
+    List<Map<String, Object>> resultList = new ArrayList<>();
+
+    for (String pair : keyValuePairs) {
+      // Split each pair into key and value
+      String[] keyValue = pair.split("=");
+
+      // Extract key and value
+      String key = keyValue[0];
+      String value = keyValue.length > 1 ? keyValue[1] : "null";
+
+      // Add to the map
+      Map<String, Object> map = new HashMap<>();
+      map.put(key, parseValue(value));
+      resultList.add(map);
+    }
+
+    return resultList;
+  }
+
+  private static Object parseValue(String value) {
+    if ("null".equals(value)) {
+      return null;
+    } else if (value.endsWith(".0")) {
+      return Integer.parseInt(value.substring(0, value.length() - 2));
+    } else {
+      return value;
+    }
   }
 
   private Object deserializeTransLocData(String url) throws IOException, ShuttleDataException {

@@ -7,16 +7,14 @@ import edu.brown.cs.student.main.server.Data.BUSRouteStopMapping;
 import edu.brown.cs.student.main.server.Data.BUSStops;
 import edu.brown.cs.student.main.server.Exceptions.ShuttleDataException;
 import edu.brown.cs.student.main.server.ServerUtility.Routes;
+import edu.brown.cs.student.main.server.ServerUtility.ServerWebSocket;
 import edu.brown.cs.student.main.server.ServerUtility.Stops;
-import edu.brown.cs.student.main.server.ServerUtility.Vehicles;
 import edu.brown.cs.student.main.server.TransLocUtility.CachedTransLocAPISource;
 import edu.brown.cs.student.main.server.TransLocUtility.TransLocAPISource;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import spark.Route;
 import spark.Spark;
 
@@ -84,10 +82,10 @@ public class Main {
     try {
       for (Object item : getDefensiveRouteStopMap()) {
         if (item instanceof BUSRouteStopMapping) {
-            BUSRouteStopMapping routeStopMapping = (BUSRouteStopMapping) item;
-            if (routeStopMapping.getId() == routeID) {
-                result.add(routeStopMapping);
-            }
+          BUSRouteStopMapping routeStopMapping = (BUSRouteStopMapping) item;
+          if (routeStopMapping.getId() == routeID) {
+            result.add(routeStopMapping);
+          }
         } else if (item instanceof Map) {
           Map<?, ?> mapItem = (Map<?, ?>) item;
 
@@ -97,15 +95,16 @@ public class Main {
 
             if (idObject instanceof Number && stopsObject instanceof List<?>) {
               int id = ((Number) idObject).intValue();
-              int[] stops = ((List<?>) stopsObject)
+              int[] stops =
+                  ((List<?>) stopsObject)
                       .stream()
-                      .filter(stop -> stop instanceof Number)
-                      .mapToInt(stop -> ((Number) stop).intValue())
-                      .toArray();
+                          .filter(stop -> stop instanceof Number)
+                          .mapToInt(stop -> ((Number) stop).intValue())
+                          .toArray();
 
               BUSRouteStopMapping routeStopMapping = new BUSRouteStopMapping(id, stops);
               if (routeStopMapping.getId() == routeID) {
-                  result.add(routeStopMapping);
+                result.add(routeStopMapping);
               }
             }
           }
@@ -130,11 +129,12 @@ public class Main {
 
             if (idObject instanceof Number && stopsObject instanceof List<?>) {
               int id = ((Number) idObject).intValue();
-              int[] stops = ((List<?>) stopsObject)
+              int[] stops =
+                  ((List<?>) stopsObject)
                       .stream()
-                      .filter(stop -> stop instanceof Number)
-                      .mapToInt(stop -> ((Number) stop).intValue())
-                      .toArray();
+                          .filter(stop -> stop instanceof Number)
+                          .mapToInt(stop -> ((Number) stop).intValue())
+                          .toArray();
 
               BUSRouteStopMapping routeStopMapping = new BUSRouteStopMapping(id, stops);
               for (int stop : routeStopMapping.getStops()) {
@@ -188,8 +188,9 @@ public class Main {
    * @param args Command-line arguments (not used).
    * @throws ShuttleDataException If there is an issue with the data source.
    */
-  public static void main(String[] args) throws ShuttleDataException {
+  public static void main(String[] args) {
     int port = 3232;
+    int webSocketPort = 3200;
 
     Spark.port(port);
 
@@ -201,13 +202,16 @@ public class Main {
 
     Spark.get("routes", (Route) new Routes());
     Spark.get("stops", (Route) new Stops());
-    Spark.get("vehicles", (Route) new Vehicles());
 
     transLoc = new CachedTransLocAPISource(new TransLocAPISource(), 100, 5);
+
+    ServerWebSocket serverWebSocket = new ServerWebSocket(webSocketPort);
+    serverWebSocket.start();
 
     Spark.init();
     Spark.awaitInitialization();
 
     System.out.println("Server started at http://localhost:" + port);
+    System.out.println("WebSocket server started at ws://localhost:" + webSocketPort);
   }
 }
