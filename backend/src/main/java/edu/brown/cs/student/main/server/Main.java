@@ -15,6 +15,8 @@ import edu.brown.cs.student.main.server.TransLocUtility.TransLocAPISource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
 import spark.Route;
 import spark.Spark;
 
@@ -80,10 +82,33 @@ public class Main {
   public static List<BUSRouteStopMapping> getRouteStopMapByRouteID(int routeID) {
     List<BUSRouteStopMapping> result = new ArrayList<>();
     try {
-      System.out.println(getDefensiveRouteStopMap());
-      for (BUSRouteStopMapping routeStopMapping : getDefensiveRouteStopMap()) {
-        if (routeStopMapping.getId() == routeID) {
-          result.add(routeStopMapping);
+      for (Object item : getDefensiveRouteStopMap()) {
+        if (item instanceof BUSRouteStopMapping) {
+            BUSRouteStopMapping routeStopMapping = (BUSRouteStopMapping) item;
+            if (routeStopMapping.getId() == routeID) {
+                result.add(routeStopMapping);
+            }
+        } else if (item instanceof Map) {
+          Map<?, ?> mapItem = (Map<?, ?>) item;
+
+          if (mapItem.containsKey("id") && mapItem.containsKey("stops")) {
+            Object idObject = mapItem.get("id");
+            Object stopsObject = mapItem.get("stops");
+
+            if (idObject instanceof Number && stopsObject instanceof List<?>) {
+              int id = ((Number) idObject).intValue();
+              int[] stops = ((List<?>) stopsObject)
+                      .stream()
+                      .filter(stop -> stop instanceof Number)
+                      .mapToInt(stop -> ((Number) stop).intValue())
+                      .toArray();
+
+              BUSRouteStopMapping routeStopMapping = new BUSRouteStopMapping(id, stops);
+              if (routeStopMapping.getId() == routeID) {
+                  result.add(routeStopMapping);
+              }
+            }
+          }
         }
       }
     } catch (Exception e) {
@@ -95,12 +120,29 @@ public class Main {
   public static List<BUSRouteStopMapping> getRouteStopMapByStopID(int stopID) {
     List<BUSRouteStopMapping> result = new ArrayList<>();
     try {
-      System.out.println(getDefensiveRouteStopMap());
-      for (BUSRouteStopMapping routeStopMapping : routeStopMap) {
-        System.out.println(routeStopMapping);
-        for (int stop : routeStopMapping.getStops()) {
-          if (stop == stopID) {
-            result.add(routeStopMapping);
+      for (Object item : routeStopMap) {
+        if (item instanceof Map) {
+          Map<?, ?> mapItem = (Map<?, ?>) item;
+
+          if (mapItem.containsKey("id") && mapItem.containsKey("stops")) {
+            Object idObject = mapItem.get("id");
+            Object stopsObject = mapItem.get("stops");
+
+            if (idObject instanceof Number && stopsObject instanceof List<?>) {
+              int id = ((Number) idObject).intValue();
+              int[] stops = ((List<?>) stopsObject)
+                      .stream()
+                      .filter(stop -> stop instanceof Number)
+                      .mapToInt(stop -> ((Number) stop).intValue())
+                      .toArray();
+
+              BUSRouteStopMapping routeStopMapping = new BUSRouteStopMapping(id, stops);
+              for (int stop : routeStopMapping.getStops()) {
+                if (stop == stopID) {
+                  result.add(routeStopMapping);
+                }
+              }
+            }
           }
         }
       }
