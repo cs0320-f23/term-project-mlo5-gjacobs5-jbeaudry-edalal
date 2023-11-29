@@ -174,24 +174,14 @@ public class TransLocAPISource implements APISource {
   }
 
   public List<Map<String, Object>> parseVehicleData(List<BUSVehicleData.Vehicle> data) {
-    String input = data.toString();
-
-    String[] keyValuePairs = input.substring(1, input.length() - 1).split(", ");
-
     List<Map<String, Object>> resultList = new ArrayList<>();
 
-    for (String pair : keyValuePairs) {
-      // Split each pair into key and value
-      String[] keyValue = pair.split("=");
+    System.out.println("Parsing vehicle data...");
+    System.out.println("Data: " + data.size());
 
-      // Extract key and value
-      String key = keyValue[0];
-      String value = keyValue.length > 1 ? keyValue[1] : "null";
-
-      // Add to the map
-      Map<String, Object> map = new HashMap<>();
-      map.put(key, parseValue(value));
-      resultList.add(map);
+    for (int i = 0; i < data.size(); i++) {
+      System.out.println(data.get(i));
+      resultList.add((Map<String, Object>) data.get(i));
     }
 
     return resultList;

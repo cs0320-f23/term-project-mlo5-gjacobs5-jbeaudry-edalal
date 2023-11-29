@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import colorPalette from './colorPalette';
 
 function VehicleMap() {
@@ -10,32 +9,28 @@ function VehicleMap() {
   };
   let map;
   let customMarkers = [];
+  let socket;
 
-  const fetchVehicleData = () => {
-    axios
-      .get('https://feeds.transloc.com/3/vehicle_statuses?agencies=635')
-      .then((response) => {
-        const newVehicleData = response.data.vehicles;
-        
-        newVehicleData.forEach((vehicle, index) => {
-          const position = {
-            lat: vehicle.position[0],
-            lng: vehicle.position[1],
-          };
-          const heading = vehicle.heading;
-  
-          console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
-        });
-        console.log(`Total vehicles: ${newVehicleData.length}`);
+  const handleWebSocketMessage = (event) => {
+    console.log(event);
 
-        setVehicleData(newVehicleData);
+    const newVehicleData = JSON.parse(event.data);
 
-        // Update custom markers
-        updateCustomMarkers(newVehicleData);
-      })
-      .catch((error) => {
-        console.error('Error fetching vehicle data:', error);
-      });
+    newVehicleData.forEach((vehicle, index) => {
+      const position = {
+        lat: vehicle.position[0],
+        lng: vehicle.position[1],
+      };
+      const heading = vehicle.heading;
+
+      console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
+    });
+    console.log(`Total vehicles: ${newVehicleData.length}`);
+
+    setVehicleData(newVehicleData);
+
+    // Update custom markers
+    updateCustomMarkers(newVehicleData);
   };
 
   const updateCustomMarkers = (newVehicleData) => {
@@ -68,12 +63,12 @@ function VehicleMap() {
       zoom: 16,
     });
 
-    const dataInterval = setInterval(() => {
-      fetchVehicleData();
-    }, 1000);
+    // Connect to WebSocket
+    socket = new WebSocket('ws://localhost:3200');
+    socket.addEventListener('message', handleWebSocketMessage);
 
     return () => {
-      clearInterval(dataInterval);
+      socket.close();
     };
   }, []);
 

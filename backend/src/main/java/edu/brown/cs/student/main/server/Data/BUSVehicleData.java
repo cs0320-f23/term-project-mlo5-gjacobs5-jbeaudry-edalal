@@ -28,6 +28,55 @@ public class BUSVehicleData {
     private double load;
     private String apcStatus;
 
+    public Vehicle(
+        long id,
+        Integer numCars,
+        String serviceStatus,
+        int agencyId,
+        long routeId,
+        long tripId,
+        String tripStart,
+        String tripEnd,
+        String gtfsTripId,
+        boolean direction,
+        long stopPatternId,
+        String callName,
+        Long currentStopId,
+        Long nextStop,
+        String arrivalStatus,
+        List<Double> position,
+        int heading,
+        double speed,
+        Long segmentId,
+        boolean offRoute,
+        long timestamp,
+        double load,
+        String apcStatus) {
+      this.id = id;
+      this.numCars = numCars;
+      this.serviceStatus = serviceStatus;
+      this.agencyId = agencyId;
+      this.routeId = routeId;
+      this.tripId = tripId;
+      this.tripStart = tripStart;
+      this.tripEnd = tripEnd;
+      this.gtfsTripId = gtfsTripId;
+      this.direction = direction;
+      this.stopPatternId = stopPatternId;
+      this.callName = callName;
+      this.currentStopId = currentStopId;
+      this.nextStop = nextStop;
+      this.arrivalStatus = arrivalStatus;
+      this.position = position;
+      this.heading = heading;
+      this.speed = speed;
+      this.segmentId = segmentId;
+      this.offRoute = offRoute;
+      this.timestamp = timestamp;
+      this.load = load;
+      this.apcStatus = apcStatus;
+    }
+
     public long getId() {
       return id;
     }
