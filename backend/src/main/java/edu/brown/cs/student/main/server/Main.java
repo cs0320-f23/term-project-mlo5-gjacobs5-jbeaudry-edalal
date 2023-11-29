@@ -6,11 +6,12 @@ import edu.brown.cs.student.main.server.Data.BUSRoute;
 import edu.brown.cs.student.main.server.Data.BUSRouteStopMapping;
 import edu.brown.cs.student.main.server.Data.BUSStops;
 import edu.brown.cs.student.main.server.Exceptions.ShuttleDataException;
-import edu.brown.cs.student.main.server.ServerRouteUtility.Routes;
-import edu.brown.cs.student.main.server.ServerRouteUtility.Stops;
-import edu.brown.cs.student.main.server.ServerRouteUtility.Vehicles;
-import edu.brown.cs.student.main.server.TransLocRouteUtility.CachedTransLocAPISource;
-import edu.brown.cs.student.main.server.TransLocRouteUtility.TransLocAPISource;
+import edu.brown.cs.student.main.server.ServerUtility.Routes;
+import edu.brown.cs.student.main.server.ServerUtility.Stops;
+import edu.brown.cs.student.main.server.ServerUtility.Vehicles;
+import edu.brown.cs.student.main.server.TransLocUtility.CachedTransLocAPISource;
+import edu.brown.cs.student.main.server.TransLocUtility.TransLocAPISource;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

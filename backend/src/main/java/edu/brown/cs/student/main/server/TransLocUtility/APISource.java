@@ -1,4 +1,4 @@
-package edu.brown.cs.student.main.server.TransLocRouteUtility;
+package edu.brown.cs.student.main.server.TransLocUtility;
 
 import edu.brown.cs.student.main.server.Data.BUSRoute;
 import edu.brown.cs.student.main.server.Data.BUSRouteStopMapping;

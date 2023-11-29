@@ -1,4 +1,4 @@
-package edu.brown.cs.student.main.server.TransLocRouteUtility;
+package edu.brown.cs.student.main.server.TransLocUtility;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;

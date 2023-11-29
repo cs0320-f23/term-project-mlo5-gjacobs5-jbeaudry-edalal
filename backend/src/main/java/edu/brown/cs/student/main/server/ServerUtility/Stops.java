@@ -1,4 +1,4 @@
-package edu.brown.cs.student.main.server.ServerRouteUtility;
+package edu.brown.cs.student.main.server.ServerUtility;
 
 import edu.brown.cs.student.main.server.Data.BUSRouteStopMapping;
 import edu.brown.cs.student.main.server.Data.BUSStops;
