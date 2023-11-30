@@ -20,17 +20,24 @@ import spark.Spark;
 
 /** The Server class represents a server application */
 public class Main {
+  // Cached TransLoc API source for fetching data and caching it
   public static CachedTransLocAPISource transLoc;
 
+  // BUS routes
   private static List<BUSRoute> routes = new ArrayList<>();
+  
   // Defensive copy of routes to ensure immutability
   private static List<BUSRoute> defensiveRoutes = null;
 
+  // BUS routes and stops mappings
   private static List<BUSRouteStopMapping> routeStopMap = new ArrayList<>();
+  
   // Defensive copy of routeStopMap to ensure immutability
   private static List<BUSRouteStopMapping> defensiveRouteStopMap = null;
 
+  // BUS Stops
   private static List<BUSStops> stops = new ArrayList<>();
+  
   // Defensive copy of stops to ensure immutability
   private static List<BUSStops> defensiveStops = null;
 
