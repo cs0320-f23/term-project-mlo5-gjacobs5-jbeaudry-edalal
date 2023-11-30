@@ -173,28 +173,86 @@ public class TransLocAPISource implements APISource {
     return Collections.emptyList();
   }
 
-  public List<Map<String, Object>> parseVehicleData(List<BUSVehicleData.Vehicle> data) {
+  public Map<String, Object> parseVehicleData(List<BUSVehicleData.Vehicle> data) {
+    Map<String, Object> result = new HashMap<>();
     List<Map<String, Object>> resultList = new ArrayList<>();
 
-    System.out.println("Parsing vehicle data...");
-    System.out.println("Data: " + data.size());
-
     for (int i = 0; i < data.size(); i++) {
-      System.out.println(data.get(i));
-      resultList.add((Map<String, Object>) data.get(i));
+        resultList.add(removeDecimalFromMap((Map<String, Object>) data.get(i)));
     }
 
-    return resultList;
+    result.put("success", true);
+    result.put("vehicles", resultList);
+
+    return result;
   }
 
-  private static Object parseValue(String value) {
-    if ("null".equals(value)) {
-      return null;
-    } else if (value.endsWith(".0")) {
-      return Integer.parseInt(value.substring(0, value.length() - 2));
-    } else {
-      return value;
+  public String mapToJson(Map<String, Object> map) {
+    StringBuilder json = new StringBuilder("{");
+
+    for (Map.Entry<String, Object> entry : map.entrySet()) {
+        json.append("\"").append(entry.getKey()).append("\":");
+
+        if (entry.getValue() instanceof List) {
+            List<?> list = (List<?>) entry.getValue();
+            json.append(listToJson(list));
+        } else {
+            json.append("\"").append(removeDecimal(entry.getValue())).append("\"");
+        }
+
+        json.append(",");
     }
+
+    if (json.charAt(json.length() - 1) == ',') {
+        json.deleteCharAt(json.length() - 1);
+    }
+
+    json.append("}");
+
+    return json.toString();
+  }
+
+  public String listToJson(List<?> list) {
+    StringBuilder json = new StringBuilder("[");
+
+    for (Object item : list) {
+        if (item instanceof Map) {
+            json.append(mapToJson((Map<String, Object>) item));
+        } else {
+            json.append("\"").append(removeDecimal(item)).append("\"");
+        }
+
+        json.append(",");
+    }
+
+    if (json.charAt(json.length() - 1) == ',') {
+        json.deleteCharAt(json.length() - 1);
+    }
+
+    json.append("]");
+
+    return json.toString();
+  }
+
+  private Object removeDecimal(Object value) {
+    if (value instanceof Double) {
+        String stringValue = String.valueOf(value);
+        if (stringValue.endsWith(".0")) {
+            return Integer.parseInt(stringValue.substring(0, stringValue.length() - 2));
+        } else {
+            return value;
+        }
+    } else {
+        return value;
+    }
+  }
+
+  private Map<String, Object> removeDecimalFromMap(Map<String, Object> map) {
+    Map<String, Object> newMap = new HashMap<>();
+    for (Map.Entry<String, Object> entry : map.entrySet()) {
+        newMap.put(entry.getKey(), removeDecimal(entry.getValue()));
+    }
+    return newMap;
   }
 
   private Object deserializeTransLocData(String url) throws IOException, ShuttleDataException {

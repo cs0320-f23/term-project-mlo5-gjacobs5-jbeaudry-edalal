@@ -33,7 +33,7 @@ public class ServerWebSocket extends WebSocketServer {
         clients.add(webSocket);
         System.out.println("WebSocket opened: " + webSocket.getRemoteSocketAddress());
         if (!fetchData) {
-            System.out.println("Starting sending loop.");
+            System.out.println("Starting sending vehicle data.");
             startSendingLoop();
         }
         fetchData = true;
@@ -45,7 +45,7 @@ public class ServerWebSocket extends WebSocketServer {
         System.out.println("WebSocket closed: " + webSocket.getRemoteSocketAddress());
         if (clients.isEmpty()) {
             fetchData = false;
-            System.out.println("Stopped sending loop.");
+            System.out.println("Stopped sending vehicle data.");
         }
     }
 
@@ -71,10 +71,9 @@ public class ServerWebSocket extends WebSocketServer {
     private void sendMessagesToAllClients() {
         if (fetchData) {
             try {
-                String message = transLoc.parseVehicleData(transLoc.getVehicleData()).toString();
+                String message = transLoc.mapToJson(transLoc.parseVehicleData(transLoc.getVehicleData()));
                 sendMessageToAllClients(message);
                 messageCount++;
-                System.out.print("\rSent vehicle data " + messageCount + " times.");
             } catch (ShuttleDataException e) {
                 e.printStackTrace();
             }
