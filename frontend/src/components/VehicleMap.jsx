@@ -12,10 +12,10 @@ function VehicleMap() {
   let socket;
 
   const handleWebSocketMessage = (event) => {
-    const newVehicleData = JSON.parse(event.data);
+    const data = JSON.parse(event.data);
 
-    if (Array.isArray(newVehicleData.vehicles)) {
-        newVehicleData.vehicles.forEach((vehicle, index) => {
+    if (Array.isArray(data.vehicles)) {
+      data.vehicles.forEach((vehicle, index) => {
             const position = {
               lat: parseFloat(vehicle.position[0]),
               lng: parseFloat(vehicle.position[1]),
@@ -25,14 +25,22 @@ function VehicleMap() {
             console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
         });
 
-        console.log(`Total vehicles: ${newVehicleData.vehicles.length}`);
+        console.log(`Total vehicles: ${data.vehicles.length}`);
 
-        setVehicleData(newVehicleData.vehicles);
+        setVehicleData(data.vehicles);
 
-        updateCustomMarkers(newVehicleData.vehicles);
+        updateCustomMarkers(data.vehicles);
     } else {
         console.error("Invalid data format. Expected an array under the 'vehicles' property.");
     }
+
+    if (Array.isArray(data.arrivals)) {
+      data.arrivals.forEach((arrival, index) => {
+        console.log(arrival);
+      });
+    }
+    
+    console.log("Total expected arrivals received: " + data.arrivals.length);
   };
 
   const updateCustomMarkers = (newVehicleData) => {

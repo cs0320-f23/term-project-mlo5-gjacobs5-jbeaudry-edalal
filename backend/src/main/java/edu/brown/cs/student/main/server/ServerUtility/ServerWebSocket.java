@@ -19,7 +19,6 @@ public class ServerWebSocket extends WebSocketServer {
     private final Set<WebSocket> clients;
     private boolean fetchData = false;
     private final ScheduledExecutorService scheduler;
-    private int messageCount = 0;
 
     public ServerWebSocket(int port) {
         super(new InetSocketAddress(port));
@@ -73,7 +72,6 @@ public class ServerWebSocket extends WebSocketServer {
             try {
                 String message = transLoc.mapToJson(transLoc.parseVehicleData(transLoc.getVehicleData()));
                 sendMessageToAllClients(message);
-                messageCount++;
             } catch (ShuttleDataException e) {
                 e.printStackTrace();
             }

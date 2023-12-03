@@ -151,38 +151,53 @@ public class TransLocAPISource implements APISource {
     return Collections.emptyList();
   }
 
-  public List<BUSVehicleData.Vehicle> getVehicleData() throws ShuttleDataException {
+  public Map<String, List<?>> getVehicleData() throws ShuttleDataException {
     try {
       Object response =
-          deserializeTransLocData("https://feeds.transloc.com/3/vehicle_statuses?agencies=635");
+          deserializeTransLocData("https://feeds.transloc.com/3/vehicle_statuses?agencies=635&include_arrivals=true");
 
       if (response instanceof Map) {
         Map<String, Object> jsonResponse = (Map<String, Object>) response;
         List<Map<String, Object>> vehiclesDataList =
             (List<Map<String, Object>>) jsonResponse.get("vehicles");
+        List<Map<String, Object>> arrivalsDataList =
+            (List<Map<String, Object>>) jsonResponse.get("arrivals");
 
         List<BUSVehicleData.Vehicle> vehicleData =
             (List<BUSVehicleData.Vehicle>) (List<?>) vehiclesDataList;
 
-        return vehicleData;
+        Map<String, List<?>> result = new HashMap<>();
+        result.put("vehicles", vehicleData);
+        result.put("arrivals", arrivalsDataList);
+
+        return result;
       }
     } catch (IOException e) {
       throw new ShuttleDataException(e.getMessage());
     }
 
-    return Collections.emptyList();
+    return (Map<String, List<?>>) Collections.emptyList();
   }
 
-  public Map<String, Object> parseVehicleData(List<BUSVehicleData.Vehicle> data) {
+  public Map<String, Object> parseVehicleData(Map<String, List<?>> data) {
     Map<String, Object> result = new HashMap<>();
     List<Map<String, Object>> resultList = new ArrayList<>();
+    List<Map<String, Object>> arrivalsList = new ArrayList<>();
 
-    for (int i = 0; i < data.size(); i++) {
-        resultList.add(removeDecimalFromMap((Map<String, Object>) data.get(i)));
+    List<?> vehiclesList = data.get("vehicles");
+    List<?> arrivalsDataList = data.get("arrivals");
+
+    for (int i = 0; i < vehiclesList.size(); i++) {
+        resultList.add(removeDecimalFromMap((Map<String, Object>) vehiclesList.get(i)));
+    }
+
+    for (int i = 0; i < arrivalsDataList.size(); i++) {
+        arrivalsList.add(removeDecimalFromMap((Map<String, Object>) arrivalsDataList.get(i)));
     }
 
     result.put("success", true);
     result.put("vehicles", resultList);
+    result.put("arrivals", arrivalsList);
 
     return result;
   }
