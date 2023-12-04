@@ -36,7 +36,8 @@ function VehicleMap() {
 
     if (Array.isArray(data.arrivals)) {
       data.arrivals.forEach((arrival, index) => {
-        console.log(arrival);
+        // do something with the arrivals here
+        // console.log(arrival);
       });
     }
     
