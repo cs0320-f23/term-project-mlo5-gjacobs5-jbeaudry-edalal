@@ -254,6 +254,8 @@ public class TransLocAPISource implements APISource {
         String stringValue = String.valueOf(value);
         if (stringValue.endsWith(".0")) {
             return Integer.parseInt(stringValue.substring(0, stringValue.length() - 2));
+        } else if (stringValue.contains("E")) {
+            return (int) Double.parseDouble(stringValue);
         } else {
             return value;
         }
