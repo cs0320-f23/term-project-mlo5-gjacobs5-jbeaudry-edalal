@@ -212,7 +212,10 @@ public class TransLocAPISource implements APISource {
             List<?> list = (List<?>) entry.getValue();
             json.append(listToJson(list));
         } else {
-            json.append("\"").append(removeDecimal(entry.getValue())).append("\"");
+          if (entry.getValue() == "") {
+            entry.setValue("null");
+          }
+          json.append("\"").append(removeDecimal(entry.getValue())).append("\"");
         }
 
         json.append(",");
