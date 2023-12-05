@@ -43,11 +43,7 @@ function VehicleMap() {
         const arrivalTime = arrival.timestamp;
 
         const currentTimeInSeconds = Math.floor(Date.now() / 1000);
-
-        // calculate the difference in seconds between the timestamp and current time
         const differenceInSeconds = arrivalTime - currentTimeInSeconds;
-
-        // calculate minutes and seconds
         const minutes = Math.floor(differenceInSeconds / 60);
         const seconds = differenceInSeconds % 60;
 
