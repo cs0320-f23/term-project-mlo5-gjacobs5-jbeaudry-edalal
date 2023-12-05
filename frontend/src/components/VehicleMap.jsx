@@ -47,7 +47,10 @@ function VehicleMap() {
         const minutes = Math.floor(differenceInSeconds / 60);
         const seconds = differenceInSeconds % 60;
 
-        console.log(`Shuttle ${shuttleCallName} is ${distance} meters away from stop ${shuttleStopID} on route ${shuttleRouteID}. It will arrive in ${minutes} minutes and ${seconds} seconds.`);
+        // only print the arrival if it is less than 2 minutes away
+        if (minutes < 2 || (minutes == 0 && seconds < 60)) {
+          console.log(`Shuttle ${shuttleCallName} is ${distance} meters away from stop ${shuttleStopID} on route ${shuttleRouteID}. It will arrive in ${minutes} minutes and ${seconds} seconds.`);
+        }
       });
     } else {
       console.error("Invalid data format. Expected an array under the 'arrivals' property.");
