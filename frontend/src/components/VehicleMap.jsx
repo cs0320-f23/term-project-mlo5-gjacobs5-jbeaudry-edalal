@@ -36,12 +36,26 @@ function VehicleMap() {
 
     if (Array.isArray(data.arrivals)) {
       data.arrivals.forEach((arrival, index) => {
-        // do something with the arrivals here
-        // console.log(arrival);
+        const shuttleCallName = arrival.call_name;
+        const shuttleStopID = arrival.stop_id;
+        const shuttleRouteID = arrival.route_id;
+        const distance = arrival.distance;
+        const arrivalTime = arrival.timestamp;
+
+        const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+
+        // calculate the difference in seconds between the timestamp and current time
+        const differenceInSeconds = arrivalTime - currentTimeInSeconds;
+
+        // calculate minutes and seconds
+        const minutes = Math.floor(differenceInSeconds / 60);
+        const seconds = differenceInSeconds % 60;
+
+        console.log(`Shuttle ${shuttleCallName} is ${distance} meters away from stop ${shuttleStopID} on route ${shuttleRouteID}. It will arrive in ${minutes} minutes and ${seconds} seconds.`);
       });
+    } else {
+      console.error("Invalid data format. Expected an array under the 'arrivals' property.");
     }
-    
-    console.log("Total expected arrivals received: " + data.arrivals.length);
   };
 
   const updateCustomMarkers = (newVehicleData) => {
