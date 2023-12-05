@@ -1,15 +1,16 @@
 const server = 'http://localhost:3232';
 
-export function fetchURL(url) {
+export async function fetchURL(url) {
     const serverUrl = `${server}/${url}`;
 
-    return fetch(serverUrl).then((response) => {
+    try {
+        const response = await fetch(serverUrl);
         if (!response.ok) {
             throw new Error('Failed to get response from backend');
         }
-        return response.json();
-    }).catch((error) => {
+        return await response.json();
+    } catch (error) {
         console.error('Error:', error);
         throw error;
-    });
+    }
 }
