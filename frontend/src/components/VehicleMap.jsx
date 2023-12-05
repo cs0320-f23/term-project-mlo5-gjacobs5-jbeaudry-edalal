@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import colorPalette from './colorPalette';
+import { getAllRoutes, getRouteByID } from '../fetch/Routes';
+import { getAllStops } from '../fetch/Stops';
+import { getStopsByStopID, getStopsByRouteID } from '../fetch/RouteStopsList';
 
 function VehicleMap() {
   const [vehicleData, setVehicleData] = useState([]);
@@ -10,6 +13,33 @@ function VehicleMap() {
   let map;
   let customMarkers = [];
   let socket;
+
+  const fetchFromBackend = async () => {
+    getAllRoutes().then((result) => {
+      console.log('All routes:');
+      console.log(result.routes);
+    });
+
+    getRouteByID("4010118").then((result) => {
+      console.log('Routes by route ID:');
+      console.log(result.routes[0]);
+    });
+
+    getAllStops().then((result) => {
+      console.log('All stops:');
+      console.log(result.stops);
+    });
+
+    getStopsByStopID("4209268").then((result) => {
+      console.log('Stops by stop ID:');
+      console.log(result.routes);
+    });
+
+    getStopsByRouteID("4010118").then((result) => {
+      console.log('Stops by route ID:');
+      console.log(result.routes);
+    });
+  };
 
   const handleWebSocketMessage = (event) => {
     const data = JSON.parse(event.data);
@@ -122,9 +152,14 @@ function VehicleMap() {
       zoom: 16,
     });
 
-    // Connect to WebSocket
+    // connect to WebSocket
     socket = new WebSocket('ws://localhost:3200');
-    socket.addEventListener('message', handleWebSocketMessage);
+    
+    // listen for messages (new vehicle data sent from server)
+    // socket.addEventListener('message', handleWebSocketMessage);
+
+    // sample fetching data from backend
+    fetchFromBackend();
 
     return () => {
       socket.close();
