@@ -102,13 +102,13 @@ function VehicleMap() {
         lng: parseFloat(vehicle.position[1]),
       };
       const heading = vehicle.heading;
-      const call_name = vehicle.call_name;
+      const callName = vehicle.call_name;
 
       const customMarker = new CustomMarker(
         map,
         position,
         heading,
-        call_name
+        callName
       );
 
       customMarker.setMap(map);
