@@ -35,6 +35,9 @@ function VehicleMap() {
     }
 
     if (Array.isArray(data.arrivals)) {
+      var count = 0;
+      var arrivalsByShuttle = {};
+
       data.arrivals.forEach((arrival, index) => {
         const shuttleCallName = arrival.call_name;
         const shuttleStopID = arrival.stop_id;
@@ -47,11 +50,43 @@ function VehicleMap() {
         const minutes = Math.floor(differenceInSeconds / 60);
         const seconds = differenceInSeconds % 60;
 
-        // only print the arrival if it is less than 2 minutes away
-        if (minutes < 2 || (minutes == 0 && seconds < 60)) {
-          console.log(`Shuttle ${shuttleCallName} is ${distance} meters away from stop ${shuttleStopID} on route ${shuttleRouteID}. It will arrive in ${minutes} minutes and ${seconds} seconds.`);
+        // only print the arrival if it is less than 5 minutes away
+        if (minutes < 5 || (minutes === 0 && seconds < 60)) {
+          if (!arrivalsByShuttle[shuttleCallName]) {
+            arrivalsByShuttle[shuttleCallName] = [];
+          }
+
+          arrivalsByShuttle[shuttleCallName].push({
+            shuttleStopID,
+            shuttleRouteID,
+            distance,
+            arrivalTime,
+            minutes,
+            seconds,
+          });
+
+          count++;
         }
       });
+
+      // sort arrivals for each shuttle by the shortest time to longest
+      for (const shuttleCallName in arrivalsByShuttle) {
+        arrivalsByShuttle[shuttleCallName].sort((a, b) => {
+          const timeDifferenceA = a.minutes * 60 + a.seconds;
+          const timeDifferenceB = b.minutes * 60 + b.seconds;
+          return timeDifferenceA - timeDifferenceB;
+        });
+      }
+
+      // print arrivals for each shuttle
+      for (const shuttleCallName in arrivalsByShuttle) {
+        console.log(`Shuttle ${shuttleCallName}:`);
+        arrivalsByShuttle[shuttleCallName].forEach((arrival) => {
+          console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
+        });
+      }
+
+      console.log(`Total arrivals: ${count}`);
     } else {
       console.error("Invalid data format. Expected an array under the 'arrivals' property.");
     }
