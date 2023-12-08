@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import colorPalette from './colorPalette';
-import { getAllRoutes, getRouteByID } from '../fetch/Routes';
-import { getAllStops, getShuttlesByStopID} from '../fetch/Stops';
-import { getStopsByStopID, getStopsByRouteID } from '../fetch/RouteStopsList';
+import React, { useState, useEffect } from "react";
+import colorPalette from "./colorPalette";
+import { getAllRoutes, getRouteByID } from "../fetch/Routes";
+import { getAllStops, getShuttlesByStopID } from "../fetch/Stops";
+import { getStopsByStopID, getStopsByRouteID } from "../fetch/RouteStopsList";
 
 function VehicleMap() {
   const [vehicleData, setVehicleData] = useState([]);
-  const [stopsData, setStopsData] = useState([]); 
+  const [stopsData, setStopsData] = useState([]);
   const [selectedStop, setSelectedStop] = useState([]);
   const [shuttlesAtStop, setShuttlesAtStop] = useState([]);
   const defaultCenter = {
@@ -18,28 +18,28 @@ function VehicleMap() {
   let socket;
   const fetchFromBackend = async () => {
     getAllRoutes().then((result) => {
-      console.log('All routes:');
+      console.log("All routes:");
       console.log(result.routes);
     });
 
     getRouteByID("4010118").then((result) => {
-      console.log('Routes by route ID:');
+      console.log("Routes by route ID:");
       console.log(result.routes[0]);
     });
 
     getAllStops().then((result) => {
-      console.log('All stops:');
+      console.log("All stops:");
       console.log(result.stops[0].position);
       setStopsData(result.stops);
     });
 
     getStopsByStopID("4209268").then((result) => {
-      console.log('Stops by stop ID:');
+      console.log("Stops by stop ID:");
       console.log(result.routes);
     });
 
     getStopsByRouteID("4010118").then((result) => {
-      console.log('Stops by route ID:');
+      console.log("Stops by route ID:");
       console.log(result.routes);
     });
   };
@@ -48,12 +48,12 @@ function VehicleMap() {
       .then((result) => {
         console.log(`Shuttles at Stop ${stop.id}:`);
         console.log(result.routes);
-        const idList = result.routes.map(route => route.id);
+        const idList = result.routes.map((route) => route.id);
         setShuttlesAtStop(idList);
         console.log(idList);
       })
       .catch((error) => {
-        console.error('Error fetching shuttles at stop:', error);
+        console.error("Error fetching shuttles at stop:", error);
       });
     getAllStops()
       .then((result) => {
@@ -61,11 +61,13 @@ function VehicleMap() {
           const stop = result.stops.find((s) => s.id === stopId);
           return stop ? stop.name : null;
         };
-        const selectedStopNames = selectedStop.map((stopId) => getStopNameById(stop.id));
-        setSelectedStop([selectedStopNames])
+        const selectedStopNames = selectedStop.map((stopId) =>
+          getStopNameById(stop.id)
+        );
+        setSelectedStop([selectedStopNames]);
       })
       .catch((error) => {
-        console.error('Error fetching shuttles at stop:', error);
+        console.error("Error fetching shuttles at stop:", error);
       });
   };
   const handleWebSocketMessage = (event) => {
@@ -73,22 +75,24 @@ function VehicleMap() {
 
     if (Array.isArray(data.vehicles)) {
       data.vehicles.forEach((vehicle, index) => {
-            const position = {
-              lat: parseFloat(vehicle.position[0]),
-              lng: parseFloat(vehicle.position[1]),
-            };
-            const heading = vehicle.heading;
+        const position = {
+          lat: parseFloat(vehicle.position[0]),
+          lng: parseFloat(vehicle.position[1]),
+        };
+        const heading = vehicle.heading;
 
-            // console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
-        });
+        // console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
+      });
 
-        // console.log(`Total vehicles: ${data.vehicles.length}`);
+      // console.log(`Total vehicles: ${data.vehicles.length}`);
 
-        setVehicleData(data.vehicles);
+      setVehicleData(data.vehicles);
 
-        updateCustomMarkers(data.vehicles);
+      updateCustomMarkers(data.vehicles);
     } else {
-        console.error("Invalid data format. Expected an array under the 'vehicles' property.");
+      console.error(
+        "Invalid data format. Expected an array under the 'vehicles' property."
+      );
     }
 
     if (Array.isArray(data.arrivals)) {
@@ -145,7 +149,9 @@ function VehicleMap() {
 
       // console.log(`Total arrivals: ${count}`);
     } else {
-      console.error("Invalid data format. Expected an array under the 'arrivals' property.");
+      console.error(
+        "Invalid data format. Expected an array under the 'arrivals' property."
+      );
     }
   };
 
@@ -161,12 +167,7 @@ function VehicleMap() {
       const heading = vehicle.heading;
       const callName = vehicle.call_name;
 
-      const customMarker = new CustomMarker(
-        map,
-        position,
-        heading,
-        callName
-      );
+      const customMarker = new CustomMarker(map, position, heading, callName);
 
       customMarker.setMap(map);
       customMarkers.push(customMarker);
@@ -174,16 +175,16 @@ function VehicleMap() {
   };
 
   useEffect(() => {
-    map = new window.google.maps.Map(document.getElementById('map'), {
+    map = new window.google.maps.Map(document.getElementById("map"), {
       center: defaultCenter,
       zoom: 16,
     });
 
     // connect to WebSocket
-    socket = new WebSocket('ws://localhost:3200');
-    
+    socket = new WebSocket("ws://localhost:3200");
+
     // listen for messages (new vehicle data sent from server)
-    socket.addEventListener('message', handleWebSocketMessage);
+    socket.addEventListener("message", handleWebSocketMessage);
 
     // sample fetching data from backend
     fetchFromBackend();
@@ -208,31 +209,54 @@ function VehicleMap() {
         map,
         title: stop.name,
       });
-      stopMarker.addListener('click', () => handleStopClick(stop));
+      stopMarker.addListener("click", () => handleStopClick(stop));
     });
   }, [stopsData]);
 
   return (
-    <div style={{ height: '100vh', width: '100%', display: 'flex' }}>
-      <div id="map" style={{ height: '100%', flex: 1 }}></div>
-      
+    <div
+      style={{
+        height: "100vh",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div id="map" style={{ height: "100%", flex: 1 }}></div>
+
+      {/* Textboxes for starting and ending locations */}
       <div
         style={{
-          backgroundColor: 'white',
-          padding: '20px',
-          margin: '20px',
-          borderRadius: '5px',
-          boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "20px",
         }}
       >
-        <h3><strong>Shuttle Information</strong></h3>
+        <input
+          type="text"
+          placeholder="Starting Location"
+          style={{ flex: 1, marginRight: "10px" }}
+        />
+        <input type="text" placeholder="Ending Location" style={{ flex: 1 }} />
+      </div>
+
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "20px",
+          margin: "20px",
+          borderRadius: "5px",
+          boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <h3>
+          <strong>Shuttle Information</strong>
+        </h3>
         <p>Stop ID: {selectedStop}</p>
         <p>Number of shuttles at stop: {shuttlesAtStop.length}</p>
       </div>
     </div>
   );
-  
-  
 }
 
 export default VehicleMap;
@@ -251,25 +275,25 @@ const google = window.google;
 CustomMarker.prototype = new google.maps.OverlayView();
 
 CustomMarker.prototype.onAdd = function () {
-  const div = document.createElement('div');
-  div.style.position = 'absolute';
+  const div = document.createElement("div");
+  div.style.position = "absolute";
   div.style.transform = `translate(-50%, -50%) rotate(${this.heading}deg)`;
-  div.style.left = '0';
-  div.style.top = '0';
-  div.style.width = '0';
-  div.style.height = '0';
-  div.style.borderLeft = '15px solid transparent';
-  div.style.borderRight = '15px solid transparent';
-  div.style.borderBottom = '30px solid ' + colorPalette.primary.brown;
+  div.style.left = "0";
+  div.style.top = "0";
+  div.style.width = "0";
+  div.style.height = "0";
+  div.style.borderLeft = "15px solid transparent";
+  div.style.borderRight = "15px solid transparent";
+  div.style.borderBottom = "30px solid " + colorPalette.primary.brown;
 
   // Create and style a div element for displaying the call name
-  const call_name_div = document.createElement('div');
-  call_name_div.style.position = 'absolute';
-  call_name_div.style.bottom = '-29px';
-  call_name_div.style.left = '50%';
-  call_name_div.style.transform = 'translateX(-50%)';
-  call_name_div.style.fontSize = '10px';
-  call_name_div.style.fontWeight = 'bold';
+  const call_name_div = document.createElement("div");
+  call_name_div.style.position = "absolute";
+  call_name_div.style.bottom = "-29px";
+  call_name_div.style.left = "50%";
+  call_name_div.style.transform = "translateX(-50%)";
+  call_name_div.style.fontSize = "10px";
+  call_name_div.style.fontWeight = "bold";
   call_name_div.style.color = colorPalette.primary.red;
   call_name_div.innerText = this.call_name;
 
@@ -283,8 +307,8 @@ CustomMarker.prototype.onAdd = function () {
 CustomMarker.prototype.draw = function () {
   const overlayProjection = this.getProjection();
   const point = overlayProjection.fromLatLngToDivPixel(this.position);
-  this.div.style.left = point.x + 'px';
-  this.div.style.top = point.y + 'px';
+  this.div.style.left = point.x + "px";
+  this.div.style.top = point.y + "px";
 };
 
 CustomMarker.prototype.onRemove = function () {
