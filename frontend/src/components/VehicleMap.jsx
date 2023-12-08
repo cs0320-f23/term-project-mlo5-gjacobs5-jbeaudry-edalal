@@ -55,7 +55,7 @@ function VehicleMap() {
       .catch((error) => {
         console.error('Error fetching shuttles at stop:', error);
       });
-      getAllStops()
+    getAllStops()
       .then((result) => {
         const getStopNameById = (stopId) => {
           const stop = result.stops.find((s) => s.id === stopId);
@@ -79,10 +79,10 @@ function VehicleMap() {
             };
             const heading = vehicle.heading;
 
-            console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
+            // console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
         });
 
-        console.log(`Total vehicles: ${data.vehicles.length}`);
+        // console.log(`Total vehicles: ${data.vehicles.length}`);
 
         setVehicleData(data.vehicles);
 
@@ -137,13 +137,13 @@ function VehicleMap() {
 
       // print arrivals for each shuttle
       for (const shuttleCallName in arrivalsByShuttle) {
-        console.log(`Shuttle ${shuttleCallName}:`);
+        // console.log(`Shuttle ${shuttleCallName}:`);
         arrivalsByShuttle[shuttleCallName].forEach((arrival) => {
-          console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
+          // console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
         });
       }
 
-      console.log(`Total arrivals: ${count}`);
+      // console.log(`Total arrivals: ${count}`);
     } else {
       console.error("Invalid data format. Expected an array under the 'arrivals' property.");
     }
