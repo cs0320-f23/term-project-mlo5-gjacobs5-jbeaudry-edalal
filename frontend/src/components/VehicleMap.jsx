@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import colorPalette from './colorPalette';
 import { getAllRoutes, getRouteByID } from '../fetch/Routes';
-import { getAllStops } from '../fetch/Stops';
+import { getAllStops, getShuttlesByStopID} from '../fetch/Stops';
 import { getStopsByStopID, getStopsByRouteID } from '../fetch/RouteStopsList';
 
 function VehicleMap() {
   const [vehicleData, setVehicleData] = useState([]);
+  const [stopsData, setStopsData] = useState([]); 
+  const [selectedStop, setSelectedStop] = useState([]);
+  const [shuttlesAtStop, setShuttlesAtStop] = useState([]);
   const defaultCenter = {
     lat: 41.825331,
     lng: -71.402523,
@@ -13,7 +16,6 @@ function VehicleMap() {
   let map;
   let customMarkers = [];
   let socket;
-
   const fetchFromBackend = async () => {
     getAllRoutes().then((result) => {
       console.log('All routes:');
@@ -27,7 +29,8 @@ function VehicleMap() {
 
     getAllStops().then((result) => {
       console.log('All stops:');
-      console.log(result.stops);
+      console.log(result.stops[0].position);
+      setStopsData(result.stops);
     });
 
     getStopsByStopID("4209268").then((result) => {
@@ -40,7 +43,31 @@ function VehicleMap() {
       console.log(result.routes);
     });
   };
-
+  const handleStopClick = (stop) => {
+    getShuttlesByStopID(stop.id)
+      .then((result) => {
+        console.log(`Shuttles at Stop ${stop.id}:`);
+        console.log(result.routes);
+        const idList = result.routes.map(route => route.id);
+        setShuttlesAtStop(idList);
+        console.log(idList);
+      })
+      .catch((error) => {
+        console.error('Error fetching shuttles at stop:', error);
+      });
+    getAllStops()
+      .then((result) => {
+        const getStopNameById = (stopId) => {
+          const stop = result.stops.find((s) => s.id === stopId);
+          return stop ? stop.name : null;
+        };
+        const selectedStopNames = selectedStop.map((stopId) => getStopNameById(stop.id));
+        setSelectedStop([selectedStopNames])
+      })
+      .catch((error) => {
+        console.error('Error fetching shuttles at stop:', error);
+      });
+  };
   const handleWebSocketMessage = (event) => {
     const data = JSON.parse(event.data);
 
@@ -52,10 +79,10 @@ function VehicleMap() {
             };
             const heading = vehicle.heading;
 
-            console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
+            // console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
         });
 
-        console.log(`Total vehicles: ${data.vehicles.length}`);
+        // console.log(`Total vehicles: ${data.vehicles.length}`);
 
         setVehicleData(data.vehicles);
 
@@ -110,13 +137,13 @@ function VehicleMap() {
 
       // print arrivals for each shuttle
       for (const shuttleCallName in arrivalsByShuttle) {
-        console.log(`Shuttle ${shuttleCallName}:`);
+        // console.log(`Shuttle ${shuttleCallName}:`);
         arrivalsByShuttle[shuttleCallName].forEach((arrival) => {
-          console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
+          // console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
         });
       }
 
-      console.log(`Total arrivals: ${count}`);
+      // console.log(`Total arrivals: ${count}`);
     } else {
       console.error("Invalid data format. Expected an array under the 'arrivals' property.");
     }
@@ -156,7 +183,7 @@ function VehicleMap() {
     socket = new WebSocket('ws://localhost:3200');
     
     // listen for messages (new vehicle data sent from server)
-    // socket.addEventListener('message', handleWebSocketMessage);
+    socket.addEventListener('message', handleWebSocketMessage);
 
     // sample fetching data from backend
     fetchFromBackend();
@@ -166,11 +193,46 @@ function VehicleMap() {
     };
   }, []);
 
+  useEffect(() => {
+    if (stopsData.length > 0) {
+      updateCustomMarkers([]);
+    }
+    stopsData.forEach((stop) => {
+      const stopPosition = {
+        lat: stop.position[0],
+        lng: stop.position[1],
+      };
+
+      const stopMarker = new google.maps.Marker({
+        position: stopPosition,
+        map,
+        title: stop.name,
+      });
+      stopMarker.addListener('click', () => handleStopClick(stop));
+    });
+  }, [stopsData]);
+
   return (
-    <div style={{ height: '100vh', width: '100%' }}>
-      <div id="map" style={{ height: '100%', width: '100%' }}></div>
+    <div style={{ height: '100vh', width: '100%', display: 'flex' }}>
+      <div id="map" style={{ height: '100%', flex: 1 }}></div>
+      
+      <div
+        style={{
+          backgroundColor: 'white',
+          padding: '20px',
+          margin: '20px',
+          borderRadius: '5px',
+          boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+        }}
+      >
+        <h3><strong>Shuttle Information</strong></h3>
+        <p>Stop ID: {selectedStop}</p>
+        <p>Number of shuttles at stop: {shuttlesAtStop.length}</p>
+      </div>
     </div>
   );
+  
+  
 }
 
 export default VehicleMap;
