@@ -3,9 +3,6 @@ import colorPalette from "./colorPalette";
 import { getAllRoutes, getRouteByID } from "../fetch/Routes";
 import { getAllStops, getShuttlesByStopID } from "../fetch/Stops";
 import { getStopsByStopID, getStopsByRouteID } from "../fetch/RouteStopsList";
-import { ACCESS_TOKEN } from "../private/token.ts";
-import mapboxgl from "mapbox-gl";
-import AddressInput from "./AddressInput.jsx";
 
 function VehicleMap() {
   const [vehicleData, setVehicleData] = useState([]);
@@ -227,7 +224,7 @@ function VehicleMap() {
     >
       <div id="map" style={{ height: "100%", flex: 1 }}></div>
 
-      {/* Textboxes for starting and ending locations [PLACEHOLDER until dropdown is added]
+      {/* Textboxes for starting and ending locations */}
       <div
         style={{
           display: "flex",
@@ -250,24 +247,6 @@ function VehicleMap() {
           margin: "20px",
           borderRadius: "5px",
           boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-        }}
-      > */}
-
-      {/* <AddressInput /> */}
-      <AddressInput
-        setSelectedStop={setSelectedStop}
-        setShuttlesAtStop={setShuttlesAtStop}
-        style={{ width: "300px", marginBottom: "10px" }}
-      />
-
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "20px",
-          margin: "20px",
-          borderRadius: "5px",
-          boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-          width: "300px",
         }}
       >
         <h3>
