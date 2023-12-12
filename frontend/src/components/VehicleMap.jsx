@@ -12,6 +12,7 @@ function VehicleMap() {
   const [stopsData, setStopsData] = useState([]);
   const [selectedStop, setSelectedStop] = useState([]);
   const [shuttlesAtStop, setShuttlesAtStop] = useState([]);
+  const { DirectionsService, DirectionsRenderer } = window.google.maps;
   const defaultCenter = {
     lat: 41.825331,
     lng: -71.402523,
@@ -19,6 +20,32 @@ function VehicleMap() {
   let map;
   let customMarkers = [];
   let socket;
+
+  function showRouteOnMap(startCoords, endCoords) {
+    const directionsService = new DirectionsService();
+    const directionsRenderer = new DirectionsRenderer();
+
+    // set the directions renderer to the map
+    directionsRenderer.setMap(map);
+
+    // define the route request
+    const request = {
+      origin: new google.maps.LatLng(startCoords.lat, startCoords.lng),
+      destination: new google.maps.LatLng(endCoords.lat, endCoords.lng),
+      travelMode: google.maps.TravelMode.DRIVING,
+    };
+
+    // make the directions request
+    directionsService.route(request, (result, status) => {
+      if (status === google.maps.DirectionsStatus.OK) {
+        // display the route on the map
+        directionsRenderer.setDirections(result);
+      } else {
+        console.error("Error displaying route:", status);
+      }
+    });
+  }
+
   const fetchFromBackend = async () => {
     getAllRoutes().then((result) => {
       console.log("All routes:");
@@ -191,6 +218,11 @@ function VehicleMap() {
 
     // sample fetching data from backend
     fetchFromBackend();
+
+    // call this function with the desired start and end coordinates
+    const startCoords = { lat: 41.825331, lng: -71.402523 };
+    const endCoords = { lat: 41.850033, lng: -71.382698 };
+    showRouteOnMap(startCoords, endCoords);
 
     return () => {
       socket.close();
