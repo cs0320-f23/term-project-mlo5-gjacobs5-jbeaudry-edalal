@@ -73,6 +73,7 @@ function VehicleMap() {
       console.log(result.routes);
     });
   };
+
   const handleStopClick = (stop) => {
     getShuttlesByStopID(stop.id)
       .then((result) => {
@@ -232,6 +233,11 @@ function VehicleMap() {
   }, []);
 
   useEffect(() => {
+    map = new window.google.maps.Map(document.getElementById("map"), {
+      center: defaultCenter,
+      zoom: 16,
+    });
+    
     if (stopsData.length > 0) {
       updateCustomMarkers([]);
     }
