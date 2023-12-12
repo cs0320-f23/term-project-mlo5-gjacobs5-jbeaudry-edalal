@@ -94,7 +94,9 @@ function VehicleMap() {
         const selectedStopNames = selectedStop.map((stopId) =>
           getStopNameById(stop.id)
         );
-        setSelectedStop([selectedStopNames]);
+        console.log("SELECTED STOP")
+        setSelectedStop(selectedStopNames);
+        console.log(selectedStopNames)
       })
       .catch((error) => {
         console.error("Error fetching shuttles at stop:", error);
@@ -305,7 +307,7 @@ function VehicleMap() {
         <h3>
           <strong>Shuttle Information</strong>
         </h3>
-        <p>Stop ID: {selectedStop}</p>
+        <p>Stop name: {selectedStop}</p>
         <p>Number of shuttles at stop: {shuttlesAtStop.length}</p>
       </div>
     </div>
