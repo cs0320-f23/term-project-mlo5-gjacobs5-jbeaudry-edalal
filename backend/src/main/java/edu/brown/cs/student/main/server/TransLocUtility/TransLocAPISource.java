@@ -154,7 +154,8 @@ public class TransLocAPISource implements APISource {
   public Map<String, List<?>> getVehicleData() throws ShuttleDataException {
     try {
       Object response =
-          deserializeTransLocData("https://feeds.transloc.com/3/vehicle_statuses?agencies=635&include_arrivals=true");
+          deserializeTransLocData(
+              "https://feeds.transloc.com/3/vehicle_statuses?agencies=635&include_arrivals=true");
 
       if (response instanceof Map) {
         Map<String, Object> jsonResponse = (Map<String, Object>) response;
@@ -188,11 +189,11 @@ public class TransLocAPISource implements APISource {
     List<?> arrivalsDataList = data.get("arrivals");
 
     for (int i = 0; i < vehiclesList.size(); i++) {
-        resultList.add(removeDecimalFromMap((Map<String, Object>) vehiclesList.get(i)));
+      resultList.add(removeDecimalFromMap((Map<String, Object>) vehiclesList.get(i)));
     }
 
     for (int i = 0; i < arrivalsDataList.size(); i++) {
-        arrivalsList.add(removeDecimalFromMap((Map<String, Object>) arrivalsDataList.get(i)));
+      arrivalsList.add(removeDecimalFromMap((Map<String, Object>) arrivalsDataList.get(i)));
     }
 
     result.put("success", true);
@@ -206,23 +207,23 @@ public class TransLocAPISource implements APISource {
     StringBuilder json = new StringBuilder("{");
 
     for (Map.Entry<String, Object> entry : map.entrySet()) {
-        json.append("\"").append(entry.getKey()).append("\":");
+      json.append("\"").append(entry.getKey()).append("\":");
 
-        if (entry.getValue() instanceof List) {
-            List<?> list = (List<?>) entry.getValue();
-            json.append(listToJson(list));
-        } else {
-          if (entry.getValue() == "") {
-            entry.setValue("null");
-          }
-          json.append("\"").append(removeDecimal(entry.getValue())).append("\"");
+      if (entry.getValue() instanceof List) {
+        List<?> list = (List<?>) entry.getValue();
+        json.append(listToJson(list));
+      } else {
+        if (entry.getValue() == "") {
+          entry.setValue("null");
         }
+        json.append("\"").append(removeDecimal(entry.getValue())).append("\"");
+      }
 
-        json.append(",");
+      json.append(",");
     }
 
     if (json.charAt(json.length() - 1) == ',') {
-        json.deleteCharAt(json.length() - 1);
+      json.deleteCharAt(json.length() - 1);
     }
 
     json.append("}");
@@ -234,17 +235,17 @@ public class TransLocAPISource implements APISource {
     StringBuilder json = new StringBuilder("[");
 
     for (Object item : list) {
-        if (item instanceof Map) {
-            json.append(mapToJson((Map<String, Object>) item));
-        } else {
-            json.append("\"").append(removeDecimal(item)).append("\"");
-        }
+      if (item instanceof Map) {
+        json.append(mapToJson((Map<String, Object>) item));
+      } else {
+        json.append("\"").append(removeDecimal(item)).append("\"");
+      }
 
-        json.append(",");
+      json.append(",");
     }
 
     if (json.charAt(json.length() - 1) == ',') {
-        json.deleteCharAt(json.length() - 1);
+      json.deleteCharAt(json.length() - 1);
     }
 
     json.append("]");
@@ -254,23 +255,23 @@ public class TransLocAPISource implements APISource {
 
   private Object removeDecimal(Object value) {
     if (value instanceof Double) {
-        String stringValue = String.valueOf(value);
-        if (stringValue.endsWith(".0")) {
-            return Integer.parseInt(stringValue.substring(0, stringValue.length() - 2));
-        } else if (stringValue.contains("E")) {
-            return (int) Double.parseDouble(stringValue);
-        } else {
-            return value;
-        }
-    } else {
+      String stringValue = String.valueOf(value);
+      if (stringValue.endsWith(".0")) {
+        return Integer.parseInt(stringValue.substring(0, stringValue.length() - 2));
+      } else if (stringValue.contains("E")) {
+        return (int) Double.parseDouble(stringValue);
+      } else {
         return value;
+      }
+    } else {
+      return value;
     }
   }
 
   private Map<String, Object> removeDecimalFromMap(Map<String, Object> map) {
     Map<String, Object> newMap = new HashMap<>();
     for (Map.Entry<String, Object> entry : map.entrySet()) {
-        newMap.put(entry.getKey(), removeDecimal(entry.getValue()));
+      newMap.put(entry.getKey(), removeDecimal(entry.getValue()));
     }
     return newMap;
   }
