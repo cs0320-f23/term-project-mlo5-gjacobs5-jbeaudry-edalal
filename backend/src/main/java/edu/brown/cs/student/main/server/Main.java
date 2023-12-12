@@ -25,19 +25,19 @@ public class Main {
 
   // BUS routes
   private static List<BUSRoute> routes = new ArrayList<>();
-  
+
   // Defensive copy of routes to ensure immutability
   private static List<BUSRoute> defensiveRoutes = null;
 
   // BUS routes and stops mappings
   private static List<BUSRouteStopMapping> routeStopMap = new ArrayList<>();
-  
+
   // Defensive copy of routeStopMap to ensure immutability
   private static List<BUSRouteStopMapping> defensiveRouteStopMap = null;
 
   // BUS Stops
   private static List<BUSStops> stops = new ArrayList<>();
-  
+
   // Defensive copy of stops to ensure immutability
   private static List<BUSStops> defensiveStops = null;
 

@@ -86,23 +86,28 @@ function VehicleMap() {
       .catch((error) => {
         console.error("Error fetching shuttles at stop:", error);
       });
+  
     getAllStops()
       .then((result) => {
         const getStopNameById = (stopId) => {
           const stop = result.stops.find((s) => s.id === stopId);
+          console.log("STOPPPPP");
+          console.log(stop);
           return stop ? stop.name : null;
         };
-        const selectedStopNames = selectedStop.map((stopId) =>
-          getStopNameById(stop.id)
-        );
-        console.log("SELECTED STOP")
-        setSelectedStop(selectedStopNames);
-        console.log(selectedStopNames)
+  
+        const selectedStopName = getStopNameById(stop.id);
+        console.log("SELECTED STOP");
+        setSelectedStop([selectedStopName]); 
+        console.log(selectedStopName);
       })
       .catch((error) => {
         console.error("Error fetching shuttles at stop:", error);
       });
   };
+  
+  
+
   const handleWebSocketMessage = (event) => {
     const data = JSON.parse(event.data);
 
@@ -313,7 +318,7 @@ function VehicleMap() {
         <h3>
           <strong>Shuttle Information</strong>
         </h3>
-        <p>Stop name: {selectedStop}</p>
+        <p>Stop: {selectedStop}</p>
         <p>Number of shuttles at stop: {shuttlesAtStop.length}</p>
       </div>
     </div>
