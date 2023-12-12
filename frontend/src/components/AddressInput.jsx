@@ -14,6 +14,9 @@ const AddressInput = () => {
     endingCoordinates: null,
   });
   const [locationUpdateCount, setLocationUpdateCount] = useState(0);
+  const [textboxPlaceholderText, setTextboxPlaceholderText] = useState(
+    "Type a starting location..."
+  );
 
   useEffect(() => {
     //get address suggestions from mapbox
@@ -57,12 +60,14 @@ const AddressInput = () => {
         ...prevCoordinates,
         startingCoordinates: selectedCoordinates,
       }));
+      setTextboxPlaceholderText("Type an ending location...");
     } else {
       selectedLocations.endingLocation = selectedFeature;
       setSelectedCoordinates((prevCoordinates) => ({
         ...prevCoordinates,
         endingCoordinates: selectedCoordinates,
       }));
+      setTextboxPlaceholderText("Type a starting location...");
     }
 
     setLocationUpdateCount(locationUpdateCount + 1);
@@ -82,7 +87,7 @@ const AddressInput = () => {
       <div style={{ display: "flex", width: "50%" }}>
         <input
           type="text"
-          placeholder="Type a location..."
+          placeholder={textboxPlaceholderText}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           style={{ width: "100%" }}
