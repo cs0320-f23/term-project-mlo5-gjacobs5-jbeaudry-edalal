@@ -55,6 +55,7 @@ const AddressInput = ({ onCoordinatesSelect }) => {
 
     if (locationUpdateCount % 2 === 0) {
       selectedLocations.startingLocation = selectedFeature;
+      console.log("selected coordinates", selectedCoordinates);
       setSelectedCoordinates((prevCoordinates) => ({
         ...prevCoordinates,
         startingCoordinates: selectedCoordinates,
@@ -70,10 +71,9 @@ const AddressInput = ({ onCoordinatesSelect }) => {
 
       // Pass coordinates to VehicleMap
       onCoordinatesSelect({
-        startingCoordinates: selectedLocations.startingLocation.geometry.coordinates,
-        endingCoordinates: selectedLocations.endingLocation.geometry.coordinates,
+        startingCoordinates: selectedStartCoordinates,
+        endingCoordinates: selectedEndCoordinates,
       });
-      
     }
 
     setLocationUpdateCount(locationUpdateCount + 1);

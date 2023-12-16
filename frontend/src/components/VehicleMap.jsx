@@ -8,7 +8,6 @@ import mapboxgl from "mapbox-gl";
 import AddressInput from "./AddressInput.jsx";
 
 function VehicleMap() {
-  
   const [vehicleData, setVehicleData] = useState([]);
   const [stopsData, setStopsData] = useState([]);
   const [selectedStop, setSelectedStop] = useState([]);
@@ -19,15 +18,17 @@ function VehicleMap() {
     lat: 41.825331,
     lng: -71.402523,
   };
-  const [startCoordinates, setStartCoordinates] = useState([41.825331, -71.402523,]);
-  const [endCoordinates, setEndCoordinates] = useState([41.825331, -71.402523,]);
+  const [startCoordinates, setStartCoordinates] = useState([
+    41.825331, -71.402523,
+  ]);
+  const [endCoordinates, setEndCoordinates] = useState([41.825331, -71.402523]);
 
   const onCoordinatesSelect = ({ startingCoordinates, endingCoordinates }) => {
     setStartCoordinates(startingCoordinates);
     setEndCoordinates(endingCoordinates);
     showRouteOnMap(startingCoordinates, endingCoordinates);
   };
-  
+
   let map;
   let customMarkers = [];
   let socket;
@@ -35,30 +36,32 @@ function VehicleMap() {
   function showRouteOnMap(startCoords, endCoords) {
     const directionsService = new DirectionsService();
     const directionsRenderer = new DirectionsRenderer();
-  
+
     // Set the directions renderer to the map
     directionsRenderer.setMap(map);
-  
+
+    console.log("startCoords: " + startCoords);
+    console.log("endCoords: " + endCoords);
+
     // Define the route request
     const request = {
       origin: new google.maps.LatLng(startCoords[1], startCoords[0]),
       destination: new google.maps.LatLng(endCoords[1], endCoords[0]),
       travelMode: google.maps.TravelMode.DRIVING,
     };
-  
+
     // Make the directions request
     directionsService.route(request, (result, status) => {
       if (status === google.maps.DirectionsStatus.OK) {
         // Display the route on the map
         directionsRenderer.setDirections(result);
         console.log("SUCCESS");
-
       } else {
         console.error("Error displaying route:", status);
       }
     });
   }
-  
+
   const fetchFromBackend = async () => {
     getAllRoutes().then((result) => {
       console.log("All routes:");
@@ -99,7 +102,7 @@ function VehicleMap() {
       .catch((error) => {
         console.error("Error fetching shuttles at stop:", error);
       });
-  
+
     getAllStops()
       .then((result) => {
         const getStopNameById = (stopId) => {
@@ -108,23 +111,20 @@ function VehicleMap() {
           console.log(stop);
           return stop ? stop.name : null;
         };
-  
+
         const selectedStopName = getStopNameById(stop.id);
         console.log("SELECTED STOP");
-        setSelectedStop([selectedStopName]); 
+        setSelectedStop([selectedStopName]);
         console.log(selectedStopName);
       })
       .catch((error) => {
         console.error("Error fetching shuttles at stop:", error);
       });
   };
-  
-  
 
   const handleWebSocketMessage = (event) => {
-
     const data = JSON.parse(event.data);
-    console.log("heyyyyy")
+    // console.log("heyyyyy");
 
     // Update the state with the new coordinates
     const newStartCoordinates = [data.startLatitude, data.startLongitude];
@@ -133,7 +133,7 @@ function VehicleMap() {
     // Update the state with the new coordinates
     setStartCoordinates(newStartCoordinates);
     setEndCoordinates(newEndCoordinates);
-    
+
     // Call the function to display the route
     showRouteOnMap(newStartCoordinates, newEndCoordinates);
 
@@ -145,13 +145,14 @@ function VehicleMap() {
         };
         const heading = vehicle.heading;
 
-        console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
+        console.log(
+          `Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`
+        );
       });
-      
+
       console.log(`Total vehicles: ${data.vehicles.length}`);
 
       setVehicleData(data.vehicles);
-
       updateCustomMarkers(data.vehicles);
     } else {
       console.error(
@@ -207,7 +208,9 @@ function VehicleMap() {
       for (const shuttleCallName in arrivalsByShuttle) {
         console.log(`Shuttle ${shuttleCallName}:`);
         arrivalsByShuttle[shuttleCallName].forEach((arrival) => {
-          console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
+          console.log(
+            `  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`
+          );
         });
       }
 
@@ -219,7 +222,9 @@ function VehicleMap() {
     }
   };
 
+  //sets markers for each vehicle
   const updateCustomMarkers = (newVehicleData) => {
+    console.log("New Vehicle Data:", newVehicleData);
     customMarkers.forEach((marker) => marker.setMap(null));
     customMarkers = [];
 
@@ -231,9 +236,10 @@ function VehicleMap() {
       const heading = vehicle.heading;
       const callName = vehicle.call_name;
 
+      console.log("This is what is on the map: " + map);
       const customMarker = new CustomMarker(map, position, heading, callName);
-
       customMarker.setMap(map);
+      console.log("vehicle being pushed to map: " + customMarker);
       customMarkers.push(customMarker);
     });
   };
@@ -243,13 +249,13 @@ function VehicleMap() {
       center: defaultCenter,
       zoom: 16,
     });
-  
+
     // stopsData.forEach((stop) => {
     //   const stopPosition = {
     //     lat: stop.position[0],
     //     lng: stop.position[1],
     //   };
-  
+
     //   const stopMarker = new google.maps.Marker({
     //     position: stopPosition,
     //     map,
@@ -257,13 +263,13 @@ function VehicleMap() {
     //   });
     //   stopMarker.addListener("click", () => handleStopClick(stop));
     // });
-  
+
     // connect to WebSocket
     socket = new WebSocket("ws://localhost:3200");
-  
+
     // listen for messages (new vehicle data sent from server)
     socket.addEventListener("message", handleWebSocketMessage);
-  
+
     // sample fetching data from backend
     fetchFromBackend();
   }, []);
@@ -279,7 +285,7 @@ function VehicleMap() {
         lat: stop.position[0],
         lng: stop.position[1],
       };
-  
+
       const stopMarker = new google.maps.Marker({
         position: stopPosition,
         map,
@@ -288,19 +294,18 @@ function VehicleMap() {
       stopMarker.addListener("click", () => handleStopClick(stop));
     });
   }, [stopsData]);
-  
+
   useEffect(() => {
     // Call the function to display the route
     showRouteOnMap(startCoordinates, endCoordinates);
   }, [startCoordinates, endCoordinates]);
-  
 
   // useEffect(() => {
   //   map = new window.google.maps.Map(document.getElementById("map"), {
   //     center: defaultCenter,
   //     zoom: 16,
   //   });
-    
+
   //   if (stopsData.length > 0) {
   //     updateCustomMarkers([]);
   //   }
