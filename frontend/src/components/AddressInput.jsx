@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import mapboxgl from "mapbox-gl";
 import { ACCESS_TOKEN } from "../private/token.ts";
 
-const AddressInput = () => {
+const AddressInput = ({ onCoordinatesSelect }) => {
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [selectedStartCoordinates, setSelectedStartCoordinates] = useState([]);
+  const [selectedEndCoordinates, setSelectedEndCoordinates] = useState([]);
   const [selectedAddresses, setSelectedAddresses] = useState({
     startingLocation: null,
     endingLocation: null,
@@ -42,7 +44,6 @@ const AddressInput = () => {
     }
   }, [searchText]);
 
-  //handles selecting an address from the suggestions in the dropdown
   const handleSelectAddress = (event) => {
     const selectedValue = event.target.value;
     const selectedFeature = suggestions.find(
@@ -50,10 +51,8 @@ const AddressInput = () => {
     );
     const selectedCoordinates = selectedFeature.geometry.coordinates;
 
-    //making copy of addresses object so we can update it
     const selectedLocations = { ...selectedAddresses };
 
-    //updates ending location every other time
     if (locationUpdateCount % 2 === 0) {
       selectedLocations.startingLocation = selectedFeature;
       setSelectedCoordinates((prevCoordinates) => ({
@@ -68,18 +67,18 @@ const AddressInput = () => {
         endingCoordinates: selectedCoordinates,
       }));
       setTextboxPlaceholderText("Type a starting location...");
+
+      // Pass coordinates to VehicleMap
+      onCoordinatesSelect({
+        startingCoordinates: selectedLocations.startingLocation.geometry.coordinates,
+        endingCoordinates: selectedLocations.endingLocation.geometry.coordinates,
+      });
+      
     }
 
     setLocationUpdateCount(locationUpdateCount + 1);
-    //for some reason the below line is logging 1 less than the actual count
-    console.log(
-      "Number of times location has been updated:",
-      locationUpdateCount
-    );
-    //clear the input after selecting an address so ending location can be selected
     setSearchText("");
     setSelectedAddresses(selectedLocations);
-    // TODO: route calculation algo here if both starting and ending locations are selected?
   };
 
   return (
@@ -93,14 +92,12 @@ const AddressInput = () => {
           style={{ width: "100%" }}
         />
 
-        {/*display suggestions in a dropdown */}
         {suggestions.length > 0 && (
           <select
             onChange={handleSelectAddress}
             value={""}
             style={{ width: "100%" }}
           >
-            {/*disables dropdown if there is no address typed (contained in value var) */}
             <option value="" disabled>
               Select an address from below
             </option>
@@ -124,7 +121,6 @@ const AddressInput = () => {
         <div>
           <h3>Ending Location:</h3>
           <p>{selectedAddresses.endingLocation.place_name}</p>
-          {/*TODO: route calculation algo here if both starting and ending locations are selected*/}
         </div>
       )}
     </div>

@@ -8,15 +8,26 @@ import mapboxgl from "mapbox-gl";
 import AddressInput from "./AddressInput.jsx";
 
 function VehicleMap() {
+  
   const [vehicleData, setVehicleData] = useState([]);
   const [stopsData, setStopsData] = useState([]);
   const [selectedStop, setSelectedStop] = useState([]);
   const [shuttlesAtStop, setShuttlesAtStop] = useState([]);
   const { DirectionsService, DirectionsRenderer } = window.google.maps;
+
   const defaultCenter = {
     lat: 41.825331,
     lng: -71.402523,
   };
+  const [startCoordinates, setStartCoordinates] = useState([41.825331, -71.402523,]);
+  const [endCoordinates, setEndCoordinates] = useState([41.825331, -71.402523,]);
+
+  const onCoordinatesSelect = ({ startingCoordinates, endingCoordinates }) => {
+    setStartCoordinates(startingCoordinates);
+    setEndCoordinates(endingCoordinates);
+    showRouteOnMap(startingCoordinates, endingCoordinates);
+  };
+  
   let map;
   let customMarkers = [];
   let socket;
@@ -24,28 +35,30 @@ function VehicleMap() {
   function showRouteOnMap(startCoords, endCoords) {
     const directionsService = new DirectionsService();
     const directionsRenderer = new DirectionsRenderer();
-
-    // set the directions renderer to the map
+  
+    // Set the directions renderer to the map
     directionsRenderer.setMap(map);
-
-    // define the route request
+  
+    // Define the route request
     const request = {
-      origin: new google.maps.LatLng(startCoords.lat, startCoords.lng),
-      destination: new google.maps.LatLng(endCoords.lat, endCoords.lng),
+      origin: new google.maps.LatLng(startCoords[1], startCoords[0]),
+      destination: new google.maps.LatLng(endCoords[1], endCoords[0]),
       travelMode: google.maps.TravelMode.DRIVING,
     };
-
-    // make the directions request
+  
+    // Make the directions request
     directionsService.route(request, (result, status) => {
       if (status === google.maps.DirectionsStatus.OK) {
-        // display the route on the map
+        // Display the route on the map
         directionsRenderer.setDirections(result);
+        console.log("SUCCESS");
+
       } else {
         console.error("Error displaying route:", status);
       }
     });
   }
-
+  
   const fetchFromBackend = async () => {
     getAllRoutes().then((result) => {
       console.log("All routes:");
@@ -109,7 +122,20 @@ function VehicleMap() {
   
 
   const handleWebSocketMessage = (event) => {
+
     const data = JSON.parse(event.data);
+    console.log("heyyyyy")
+
+    // Update the state with the new coordinates
+    const newStartCoordinates = [data.startLatitude, data.startLongitude];
+    const newEndCoordinates = [data.endLatitude, data.endLongitude];
+
+    // Update the state with the new coordinates
+    setStartCoordinates(newStartCoordinates);
+    setEndCoordinates(newEndCoordinates);
+    
+    // Call the function to display the route
+    showRouteOnMap(newStartCoordinates, newEndCoordinates);
 
     if (Array.isArray(data.vehicles)) {
       data.vehicles.forEach((vehicle, index) => {
@@ -119,10 +145,10 @@ function VehicleMap() {
         };
         const heading = vehicle.heading;
 
-        // console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
+        console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
       });
-
-      // console.log(`Total vehicles: ${data.vehicles.length}`);
+      
+      console.log(`Total vehicles: ${data.vehicles.length}`);
 
       setVehicleData(data.vehicles);
 
@@ -179,13 +205,13 @@ function VehicleMap() {
 
       // print arrivals for each shuttle
       for (const shuttleCallName in arrivalsByShuttle) {
-        // console.log(`Shuttle ${shuttleCallName}:`);
+        console.log(`Shuttle ${shuttleCallName}:`);
         arrivalsByShuttle[shuttleCallName].forEach((arrival) => {
-          // console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
+          console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
         });
       }
 
-      // console.log(`Total arrivals: ${count}`);
+      console.log(`Total arrivals: ${count}`);
     } else {
       console.error(
         "Invalid data format. Expected an array under the 'arrivals' property."
@@ -217,24 +243,29 @@ function VehicleMap() {
       center: defaultCenter,
       zoom: 16,
     });
-
+  
+    // stopsData.forEach((stop) => {
+    //   const stopPosition = {
+    //     lat: stop.position[0],
+    //     lng: stop.position[1],
+    //   };
+  
+    //   const stopMarker = new google.maps.Marker({
+    //     position: stopPosition,
+    //     map,
+    //     title: stop.name,
+    //   });
+    //   stopMarker.addListener("click", () => handleStopClick(stop));
+    // });
+  
     // connect to WebSocket
     socket = new WebSocket("ws://localhost:3200");
-
+  
     // listen for messages (new vehicle data sent from server)
     socket.addEventListener("message", handleWebSocketMessage);
-
+  
     // sample fetching data from backend
     fetchFromBackend();
-
-    // call this function with the desired start and end coordinates
-    const startCoords = { lat: 41.825331, lng: -71.402523 };
-    const endCoords = { lat: 41.850033, lng: -71.382698 };
-    showRouteOnMap(startCoords, endCoords);
-
-    return () => {
-      socket.close();
-    };
   }, []);
 
   useEffect(() => {
@@ -242,16 +273,13 @@ function VehicleMap() {
       center: defaultCenter,
       zoom: 16,
     });
-    
-    if (stopsData.length > 0) {
-      updateCustomMarkers([]);
-    }
+    // Call the function to display the route
     stopsData.forEach((stop) => {
       const stopPosition = {
         lat: stop.position[0],
         lng: stop.position[1],
       };
-
+  
       const stopMarker = new google.maps.Marker({
         position: stopPosition,
         map,
@@ -260,6 +288,36 @@ function VehicleMap() {
       stopMarker.addListener("click", () => handleStopClick(stop));
     });
   }, [stopsData]);
+  
+  useEffect(() => {
+    // Call the function to display the route
+    showRouteOnMap(startCoordinates, endCoordinates);
+  }, [startCoordinates, endCoordinates]);
+  
+
+  // useEffect(() => {
+  //   map = new window.google.maps.Map(document.getElementById("map"), {
+  //     center: defaultCenter,
+  //     zoom: 16,
+  //   });
+    
+  //   if (stopsData.length > 0) {
+  //     updateCustomMarkers([]);
+  //   }
+  //   stopsData.forEach((stop) => {
+  //     const stopPosition = {
+  //       lat: stop.position[0],
+  //       lng: stop.position[1],
+  //     };
+
+  //     const stopMarker = new google.maps.Marker({
+  //       position: stopPosition,
+  //       map,
+  //       title: stop.name,
+  //     });
+  //     stopMarker.addListener("click", () => handleStopClick(stop));
+  //   });
+  // }, [stopsData]);
 
   return (
     <div
@@ -272,34 +330,8 @@ function VehicleMap() {
     >
       <div id="map" style={{ height: "100%", flex: 1 }}></div>
 
-      {/* Textboxes for starting and ending locations [PLACEHOLDER until dropdown is added]
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          padding: "20px",
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Starting Location"
-          style={{ flex: 1, marginRight: "10px" }}
-        />
-        <input type="text" placeholder="Ending Location" style={{ flex: 1 }} />
-      </div>
-
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "20px",
-          margin: "20px",
-          borderRadius: "5px",
-          boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-        }}
-      > */}
-
-      {/* <AddressInput /> */}
       <AddressInput
+        onCoordinatesSelect={onCoordinatesSelect}
         setSelectedStop={setSelectedStop}
         setShuttlesAtStop={setShuttlesAtStop}
         style={{ width: "300px", marginBottom: "10px" }}
