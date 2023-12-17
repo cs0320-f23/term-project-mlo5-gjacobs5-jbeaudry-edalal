@@ -8,7 +8,6 @@ import mapboxgl from "mapbox-gl";
 import AddressInput from "./AddressInput.jsx";
 
 function VehicleMap() {
-  
   const [vehicleData, setVehicleData] = useState([]);
   const [stopsData, setStopsData] = useState([]);
   const [selectedStop, setSelectedStop] = useState([]);
@@ -19,15 +18,16 @@ function VehicleMap() {
     lat: 41.825331,
     lng: -71.402523,
   };
-  const [startCoordinates, setStartCoordinates] = useState([41.825331, -71.402523,]);
-  const [endCoordinates, setEndCoordinates] = useState([41.825331, -71.402523,]);
+
+  const [startCoordinates, setStartCoordinates] = useState([41.825331, -71.402523]);
+  const [endCoordinates, setEndCoordinates] = useState([41.825331, -71.402523]);
 
   const onCoordinatesSelect = ({ startingCoordinates, endingCoordinates }) => {
     setStartCoordinates(startingCoordinates);
     setEndCoordinates(endingCoordinates);
     showRouteOnMap(startingCoordinates, endingCoordinates);
   };
-  
+
   let map;
   let customMarkers = [];
   let socket;
@@ -269,17 +269,12 @@ function VehicleMap() {
   }, []);
 
   useEffect(() => {
-    map = new window.google.maps.Map(document.getElementById("map"), {
-      center: defaultCenter,
-      zoom: 16,
-    });
-    // Call the function to display the route
     stopsData.forEach((stop) => {
       const stopPosition = {
         lat: stop.position[0],
         lng: stop.position[1],
       };
-  
+
       const stopMarker = new google.maps.Marker({
         position: stopPosition,
         map,
