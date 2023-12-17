@@ -6,3 +6,4 @@ frontend/node_modules
 sample/BrunoBUSBuddy/node_modules
 sample/WebSocket/node_modules
 frontend/src/private
+frontend/build
