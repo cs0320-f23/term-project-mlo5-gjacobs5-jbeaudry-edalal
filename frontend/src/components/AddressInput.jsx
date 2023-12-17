@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import mapboxgl from "mapbox-gl";
 import { ACCESS_TOKEN } from "../private/token.ts";
 
 const AddressInput = ({ onCoordinatesSelect }) => {
@@ -19,6 +18,17 @@ const AddressInput = ({ onCoordinatesSelect }) => {
   const [textboxPlaceholderText, setTextboxPlaceholderText] = useState(
     "Type a starting location..."
   );
+
+  //currently keyboard shortcut is not working but does not impact functionality
+  const handleKeyDown = (event) => {
+    console.log("Key pressed:");
+    //using control J to click on "type in starting location" textbox
+    if (event.ctrlKey && event.key === "j") {
+      console.log("Ctrl + J pressed");
+      // Focus on the input when Ctrl + J is pressed
+      document.getElementById("addressTextbox").click();
+    }
+  };
 
   useEffect(() => {
     //get address suggestions from mapbox
@@ -53,6 +63,7 @@ const AddressInput = ({ onCoordinatesSelect }) => {
 
     const selectedLocations = { ...selectedAddresses };
 
+    //alternates between updating starting and ending locations
     if (locationUpdateCount % 2 === 0) {
       selectedLocations.startingLocation = selectedFeature;
       setSelectedCoordinates((prevCoordinates) => ({
@@ -70,10 +81,11 @@ const AddressInput = ({ onCoordinatesSelect }) => {
 
       // Pass coordinates to VehicleMap
       onCoordinatesSelect({
-        startingCoordinates: selectedLocations.startingLocation.geometry.coordinates,
-        endingCoordinates: selectedLocations.endingLocation.geometry.coordinates,
+        startingCoordinates:
+          selectedLocations.startingLocation.geometry.coordinates,
+        endingCoordinates:
+          selectedLocations.endingLocation.geometry.coordinates,
       });
-      
     }
 
     setLocationUpdateCount(locationUpdateCount + 1);
@@ -83,20 +95,49 @@ const AddressInput = ({ onCoordinatesSelect }) => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", width: "50%" }}>
+      <div
+        style={{
+          display: "flex",
+          width: "99%",
+          marginTop: "10px",
+          marginLeft: "20px",
+          marginRight: "20px",
+        }}
+      >
         <input
+          id="addressTextbox"
           type="text"
           placeholder={textboxPlaceholderText}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: "100%" }}
+          style={{
+            width: "100%",
+            font: "inherit",
+            fontSize: "12px",
+            padding: "5px",
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+            backgroundColor: "#ebebeb",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+          }}
+          onKeyDown={handleKeyDown}
         />
 
         {suggestions.length > 0 && (
           <select
             onChange={handleSelectAddress}
             value={""}
-            style={{ width: "100%" }}
+            style={{
+              width: "100%",
+              font: "inherit",
+              fontSize: "12px",
+              padding: "5px",
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+              backgroundColor: "#fcfafa",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              marginLeft: "10px",
+            }}
           >
             <option value="" disabled>
               Select an address from below
@@ -110,19 +151,31 @@ const AddressInput = ({ onCoordinatesSelect }) => {
         )}
       </div>
 
-      {selectedAddresses.startingLocation && (
-        <div>
-          <h3>Starting Location:</h3>
-          <p>{selectedAddresses.startingLocation.place_name}</p>
-        </div>
-      )}
+      <div style={{ display: "flex" }}>
+        {selectedAddresses.startingLocation && (
+          <div
+            style={{
+              marginRight: "20px",
+              fontSize: "12px",
+              marginLeft: "20px",
+            }}
+          >
+            <h3>Starting Location:</h3>
+            <p>{selectedAddresses.startingLocation.place_name}</p>
+          </div>
+        )}
 
-      {selectedAddresses.endingLocation && (
-        <div>
-          <h3>Ending Location:</h3>
-          <p>{selectedAddresses.endingLocation.place_name}</p>
-        </div>
-      )}
+        {selectedAddresses.endingLocation && (
+          <div
+            style={{
+              fontSize: "12px",
+            }}
+          >
+            <h3>Ending Location:</h3>
+            <p>{selectedAddresses.endingLocation.place_name}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
