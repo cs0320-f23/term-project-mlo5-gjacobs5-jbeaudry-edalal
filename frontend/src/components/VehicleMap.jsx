@@ -135,7 +135,7 @@ function VehicleMap() {
     setEndCoordinates(newEndCoordinates);
     
     // Call the function to display the route
-    showRouteOnMap(newStartCoordinates, newEndCoordinates);
+    // showRouteOnMap(newStartCoordinates, newEndCoordinates);
 
     if (Array.isArray(data.vehicles)) {
       data.vehicles.forEach((vehicle, index) => {
@@ -289,10 +289,10 @@ function VehicleMap() {
     });
   }, [stopsData]);
   
-  useEffect(() => {
+  /*useEffect(() => {
     // Call the function to display the route
     showRouteOnMap(startCoordinates, endCoordinates);
-  }, [startCoordinates, endCoordinates]);
+  }, [startCoordinates, endCoordinates]);*/
   
 
   // useEffect(() => {
