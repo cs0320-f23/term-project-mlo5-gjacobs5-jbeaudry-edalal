@@ -64,7 +64,7 @@ public class ServerWebSocket extends WebSocketServer {
   }
 
   private void startSendingLoop() {
-    scheduler.scheduleAtFixedRate(this::sendMessagesToAllClients, 0, 5000, TimeUnit.MILLISECONDS);
+    scheduler.scheduleAtFixedRate(this::sendMessagesToAllClients, 0, 1000, TimeUnit.MILLISECONDS);
   }
 
   private void sendMessagesToAllClients() {

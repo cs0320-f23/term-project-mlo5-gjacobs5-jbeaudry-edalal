@@ -21,11 +21,14 @@ function VehicleMap() {
 
   const [startCoordinates, setStartCoordinates] = useState([41.825331, -71.402523]);
   const [endCoordinates, setEndCoordinates] = useState([41.825331, -71.402523]);
+  const [showRoute, setShowRoute] = useState(false);
 
   const onCoordinatesSelect = ({ startingCoordinates, endingCoordinates }) => {
     setStartCoordinates(startingCoordinates);
     setEndCoordinates(endingCoordinates);
-    showRouteOnMap(startingCoordinates, endingCoordinates);
+
+    // showRouteOnMap(startCoords, endCoords);
+    setShowRoute(true);
   };
 
   let map;
@@ -41,8 +44,8 @@ function VehicleMap() {
   
     // Define the route request
     const request = {
-      origin: new google.maps.LatLng(startCoords[1], startCoords[0]),
-      destination: new google.maps.LatLng(endCoords[1], endCoords[0]),
+      origin: new google.maps.LatLng(startCoords.lat, startCoords.lng),
+      destination: new google.maps.LatLng(endCoords.lat, endCoords.lng),
       travelMode: google.maps.TravelMode.DRIVING,
     };
   
@@ -118,13 +121,11 @@ function VehicleMap() {
         console.error("Error fetching shuttles at stop:", error);
       });
   };
-  
-  
 
   const handleWebSocketMessage = (event) => {
 
     const data = JSON.parse(event.data);
-    console.log("heyyyyy")
+    //console.log("heyyyyy")
 
     // Update the state with the new coordinates
     const newStartCoordinates = [data.startLatitude, data.startLongitude];
@@ -145,10 +146,10 @@ function VehicleMap() {
         };
         const heading = vehicle.heading;
 
-        console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
+        //console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
       });
       
-      console.log(`Total vehicles: ${data.vehicles.length}`);
+      //console.log(`Total vehicles: ${data.vehicles.length}`);
 
       setVehicleData(data.vehicles);
 
@@ -205,13 +206,13 @@ function VehicleMap() {
 
       // print arrivals for each shuttle
       for (const shuttleCallName in arrivalsByShuttle) {
-        console.log(`Shuttle ${shuttleCallName}:`);
+        //console.log(`Shuttle ${shuttleCallName}:`);
         arrivalsByShuttle[shuttleCallName].forEach((arrival) => {
-          console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
+          //console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
         });
       }
 
-      console.log(`Total arrivals: ${count}`);
+      //console.log(`Total arrivals: ${count}`);
     } else {
       console.error(
         "Invalid data format. Expected an array under the 'arrivals' property."
@@ -282,6 +283,32 @@ function VehicleMap() {
       });
       stopMarker.addListener("click", () => handleStopClick(stop));
     });
+
+
+    if (showRoute) {
+      console.log("Showing route with Google Maps API");
+      const startLatValue = startCoordinates[1];
+      const startLngValue = startCoordinates[0];
+      console.log('Start Coordinates:', startLatValue, startLngValue);
+
+      const endLatValue = endCoordinates[1];
+      const endLngValue = endCoordinates[0];
+      console.log('End Coordinates:', endLatValue, endLngValue);
+
+      const startCoords = {
+        lat: parseFloat(startLatValue),
+        lng: parseFloat(startLngValue)
+      };
+
+      const endCoords = {
+        lat: parseFloat(endLatValue),
+        lng: parseFloat(endLngValue)
+      };
+
+      console.log('Parsed Start Coordinates:', startCoords);
+      console.log('Parsed End Coordinates:', endCoords);
+      showRouteOnMap(startCoords, endCoords);
+    }
   }, [stopsData]);
   
   /*useEffect(() => {
