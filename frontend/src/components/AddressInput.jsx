@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import mapboxgl from "mapbox-gl";
-import { ACCESS_TOKEN } from "../private/token.ts";
+//import { ACCESS_TOKEN } from "../private/token.ts";
 
 const AddressInput = ({ onCoordinatesSelect }) => {
   const [searchText, setSearchText] = useState("");
@@ -25,7 +25,7 @@ const AddressInput = ({ onCoordinatesSelect }) => {
     const fetchSuggestions = async () => {
       try {
         const response = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchText}.json?access_token=${ACCESS_TOKEN}`
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchText}.json?access_token=AIzaSyAXm5g_1RR6PEuXzWvooPO4MCsFCHb8rVY`
         );
 
         const data = await response.json();
@@ -70,10 +70,11 @@ const AddressInput = ({ onCoordinatesSelect }) => {
 
       // Pass coordinates to VehicleMap
       onCoordinatesSelect({
-        startingCoordinates: selectedLocations.startingLocation.geometry.coordinates,
-        endingCoordinates: selectedLocations.endingLocation.geometry.coordinates,
+        startingCoordinates:
+          selectedLocations.startingLocation.geometry.coordinates,
+        endingCoordinates:
+          selectedLocations.endingLocation.geometry.coordinates,
       });
-      
     }
 
     setLocationUpdateCount(locationUpdateCount + 1);
