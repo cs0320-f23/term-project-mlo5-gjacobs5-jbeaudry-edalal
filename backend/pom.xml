@@ -74,6 +74,15 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- <dependencies> -->
+    <!-- Other dependencies -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.8</version>
+      <!-- Or the latest version available -->
+    </dependency>
+
     <!--
            JUnit is a unit testing library for Java.
     -->
@@ -83,6 +92,7 @@
       <version>5.4.0</version>
       <scope>test</scope>
     </dependency>
+    <!-- </dependencies> -->
 
   </dependencies>
   <build>
