@@ -209,6 +209,7 @@ public class Main {
 
     Spark.get("routes", (Route) new Routes());
     Spark.get("stops", (Route) new Stops());
+    Spark.get("algorithm", (Route) new Algorithm());
 
     transLoc = new CachedTransLocAPISource(new TransLocAPISource(), 100, 5);
 
