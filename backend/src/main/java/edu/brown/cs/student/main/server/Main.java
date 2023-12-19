@@ -6,6 +6,7 @@ import edu.brown.cs.student.main.server.Data.BUSRoute;
 import edu.brown.cs.student.main.server.Data.BUSRouteStopMapping;
 import edu.brown.cs.student.main.server.Data.BUSStops;
 import edu.brown.cs.student.main.server.Exceptions.ShuttleDataException;
+import edu.brown.cs.student.main.server.ServerUtility.Algorithm;
 import edu.brown.cs.student.main.server.ServerUtility.Routes;
 import edu.brown.cs.student.main.server.ServerUtility.ServerWebSocket;
 import edu.brown.cs.student.main.server.ServerUtility.Stops;
@@ -209,6 +210,7 @@ public class Main {
 
     Spark.get("routes", (Route) new Routes());
     Spark.get("stops", (Route) new Stops());
+    Spark.get("algorithm", (Route) new Algorithm());
 
     transLoc = new CachedTransLocAPISource(new TransLocAPISource(), 100, 5);
 

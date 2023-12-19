@@ -3,10 +3,41 @@ import colorPalette from "./colorPalette";
 import { getAllRoutes, getRouteByID } from "../fetch/Routes";
 import { getAllStops, getShuttlesByStopID } from "../fetch/Stops";
 import { getStopsByStopID, getStopsByRouteID } from "../fetch/RouteStopsList";
-import { ACCESS_TOKEN } from "../private/token.ts";
+//import { ACCESS_TOKEN } from "../private/token.ts";
 import mapboxgl from "mapbox-gl";
 import AddressInput from "./AddressInput.jsx";
+/* 
+The first argument is the start lat and start long -> starting location 
+Second argument is the end lat and end long -> ending location 
+Leave 0 there 
+const apiUrl = 'http://localhost:3232/algorithm?s_lat=10.0&s_long=50.0&e_lat=-10.0&e_long=100.0&time=0'; 
 
+// Fetch data from the URL
+fetch(apiUrl)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok.');
+        }
+        return response.json(); // Parse the JSON response
+    })
+    .then(data => {
+        // Assuming the received data is in the format: { "start": [41.818824, -71.408827], "end": [41.818015, -71.406897] }
+        
+        // Retrieve the start and end coordinates from the fetched JSON data
+        const startCoordinates: number[] = data.start || [];
+        const endCoordinates: number[] = data.end || [];
+
+        // Process or use the retrieved coordinates as needed
+        console.log("Start Coordinates:");
+        printCoordinates(startCoordinates);
+
+        console.log("\nEnd Coordinates:");
+        printCoordinates(endCoordinates);
+    })
+    .catch(error => {
+        console.error('There was a problem fetching the data:', error);
+    });
+*/
 function VehicleMap() {
   const [vehicleData, setVehicleData] = useState([]);
   const [stopsData, setStopsData] = useState([]);
@@ -19,7 +50,9 @@ function VehicleMap() {
     lng: -71.402523,
   };
 
-  const [startCoordinates, setStartCoordinates] = useState([41.825331, -71.402523]);
+  const [startCoordinates, setStartCoordinates] = useState([
+    41.825331, -71.402523,
+  ]);
   const [endCoordinates, setEndCoordinates] = useState([41.825331, -71.402523]);
   const [showRoute, setShowRoute] = useState(false);
 
@@ -38,30 +71,29 @@ function VehicleMap() {
   function showRouteOnMap(startCoords, endCoords) {
     const directionsService = new DirectionsService();
     const directionsRenderer = new DirectionsRenderer();
-  
+
     // Set the directions renderer to the map
     directionsRenderer.setMap(map);
-  
+
     // Define the route request
     const request = {
       origin: new google.maps.LatLng(startCoords.lat, startCoords.lng),
       destination: new google.maps.LatLng(endCoords.lat, endCoords.lng),
       travelMode: google.maps.TravelMode.DRIVING,
     };
-  
+
     // Make the directions request
     directionsService.route(request, (result, status) => {
       if (status === google.maps.DirectionsStatus.OK) {
         // Display the route on the map
         directionsRenderer.setDirections(result);
         console.log("SUCCESS");
-
       } else {
         console.error("Error displaying route:", status);
       }
     });
   }
-  
+
   const fetchFromBackend = async () => {
     getAllRoutes().then((result) => {
       console.log("All routes:");
@@ -102,7 +134,7 @@ function VehicleMap() {
       .catch((error) => {
         console.error("Error fetching shuttles at stop:", error);
       });
-  
+
     getAllStops()
       .then((result) => {
         const getStopNameById = (stopId) => {
@@ -111,10 +143,10 @@ function VehicleMap() {
           console.log(stop);
           return stop ? stop.name : null;
         };
-  
+
         const selectedStopName = getStopNameById(stop.id);
         console.log("SELECTED STOP");
-        setSelectedStop([selectedStopName]); 
+        setSelectedStop([selectedStopName]);
         console.log(selectedStopName);
       })
       .catch((error) => {
@@ -123,7 +155,6 @@ function VehicleMap() {
   };
 
   const handleWebSocketMessage = (event) => {
-
     const data = JSON.parse(event.data);
     //console.log("heyyyyy")
 
@@ -134,7 +165,7 @@ function VehicleMap() {
     // Update the state with the new coordinates
     setStartCoordinates(newStartCoordinates);
     setEndCoordinates(newEndCoordinates);
-    
+
     // Call the function to display the route
     // showRouteOnMap(newStartCoordinates, newEndCoordinates);
 
@@ -148,7 +179,7 @@ function VehicleMap() {
 
         //console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
       });
-      
+
       //console.log(`Total vehicles: ${data.vehicles.length}`);
 
       setVehicleData(data.vehicles);
@@ -244,13 +275,13 @@ function VehicleMap() {
       center: defaultCenter,
       zoom: 16,
     });
-  
+
     // stopsData.forEach((stop) => {
     //   const stopPosition = {
     //     lat: stop.position[0],
     //     lng: stop.position[1],
     //   };
-  
+
     //   const stopMarker = new google.maps.Marker({
     //     position: stopPosition,
     //     map,
@@ -258,13 +289,13 @@ function VehicleMap() {
     //   });
     //   stopMarker.addListener("click", () => handleStopClick(stop));
     // });
-  
+
     // connect to WebSocket
     socket = new WebSocket("ws://localhost:3200");
-  
+
     // listen for messages (new vehicle data sent from server)
     socket.addEventListener("message", handleWebSocketMessage);
-  
+
     // sample fetching data from backend
     fetchFromBackend();
   }, []);
@@ -284,45 +315,43 @@ function VehicleMap() {
       stopMarker.addListener("click", () => handleStopClick(stop));
     });
 
-
     if (showRoute) {
       console.log("Showing route with Google Maps API");
       const startLatValue = startCoordinates[1];
       const startLngValue = startCoordinates[0];
-      console.log('Start Coordinates:', startLatValue, startLngValue);
+      console.log("Start Coordinates:", startLatValue, startLngValue);
 
       const endLatValue = endCoordinates[1];
       const endLngValue = endCoordinates[0];
-      console.log('End Coordinates:', endLatValue, endLngValue);
+      console.log("End Coordinates:", endLatValue, endLngValue);
 
       const startCoords = {
         lat: parseFloat(startLatValue),
-        lng: parseFloat(startLngValue)
+        lng: parseFloat(startLngValue),
       };
 
       const endCoords = {
         lat: parseFloat(endLatValue),
-        lng: parseFloat(endLngValue)
+        lng: parseFloat(endLngValue),
       };
 
-      console.log('Parsed Start Coordinates:', startCoords);
-      console.log('Parsed End Coordinates:', endCoords);
+      console.log("Parsed Start Coordinates:", startCoords);
+      console.log("Parsed End Coordinates:", endCoords);
       showRouteOnMap(startCoords, endCoords);
     }
   }, [stopsData]);
-  
+
   /*useEffect(() => {
     // Call the function to display the route
     showRouteOnMap(startCoordinates, endCoordinates);
   }, [startCoordinates, endCoordinates]);*/
-  
 
   // useEffect(() => {
   //   map = new window.google.maps.Map(document.getElementById("map"), {
   //     center: defaultCenter,
   //     zoom: 16,
   //   });
-    
+
   //   if (stopsData.length > 0) {
   //     updateCustomMarkers([]);
   //   }
