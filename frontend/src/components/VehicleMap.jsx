@@ -6,7 +6,39 @@ import { getStopsByStopID, getStopsByRouteID } from "../fetch/RouteStopsList";
 import { ACCESS_TOKEN } from "../private/token.ts";
 import mapboxgl from "mapbox-gl";
 import AddressInput from "./AddressInput.jsx";
+/* 
+The first argument is the start lat and start long -> starting location (s_lat is your current position same for long)
+Second argument is the end lat and end long -> ending location (e_lat is your ending position and same for long)
+Leave 0 there 
+const apiUrl = 'http://localhost:3232/algorithm?s_lat=10.0&s_long=50.0&e_lat=-10.0&e_long=100.0&time=0'; 
 
+// Fetch data from the URL
+fetch(apiUrl)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok.');
+        }
+        return response.json(); // Parse the JSON response
+    })
+    .then(data => {
+        // Assuming the received data is in the format: { "start": [41.818824, -71.408827], "end": [41.818015, -71.406897] }
+        // start means the first shuttle stop (get onto)
+        // end means the last shuttle stop (get off on)
+        // Retrieve the start and end coordinates from the fetched JSON data
+        const startCoordinates: number[] = data.start || [];
+        const endCoordinates: number[] = data.end || [];
+
+        // Process or use the retrieved coordinates as needed
+        console.log("Start Coordinates:");
+        printCoordinates(startCoordinates);
+
+        console.log("\nEnd Coordinates:");
+        printCoordinates(endCoordinates);
+    })
+    .catch(error => {
+        console.error('There was a problem fetching the data:', error);
+    });
+*/
 function VehicleMap() {
   
   const [vehicleData, setVehicleData] = useState([]);
