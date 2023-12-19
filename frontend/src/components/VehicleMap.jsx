@@ -39,6 +39,43 @@ fetch(apiUrl)
         console.error('There was a problem fetching the data:', error);
     });
 */
+function getbackend(start, end) {
+  let slat = start[0];
+  let slong = start[1];
+  let elat = end[0];
+  let elong = start[1];
+  const apiUrl =
+    "const apiUrl = `http://localhost:3232/algorithm?s_lat=${slat}&s_long=${slong}&e_lat=${elat}&e_long=${elong}&time=0`;";
+
+  // Fetch data from the URL
+
+  fetch(apiUrl)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok.");
+      }
+      return response.json(); // Parse the JSON response
+    })
+    .then((data) => {
+      // Assuming the received data is in the format: { "start": [41.818824, -71.408827], "end": [41.818015, -71.406897] }
+
+      // Retrieve the start and end coordinates from the fetched JSON data
+      const startCoordinates = Array.isArray(data.start) ? data.start : [];
+      const endCoordinates = Array.isArray(data.end) ? data.end : [];
+      return [startCoordinates, endCoordinates];
+
+      // Process or use the retrieved coordinates as needed
+      console.log("Start Coordinates:");
+      printCoordinates(startCoordinates);
+
+      console.log("\nEnd Coordinates:");
+      printCoordinates(endCoordinates);
+    })
+    .catch((error) => {
+      console.error("There was a problem fetching the data:", error);
+    });
+}
+
 function VehicleMap() {
   
   const [vehicleData, setVehicleData] = useState([]);
