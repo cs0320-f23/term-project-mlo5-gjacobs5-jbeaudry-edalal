@@ -260,8 +260,7 @@ function VehicleMap() {
   
     // connect to WebSocket
     socket = new WebSocket("ws://localhost:3200");
-  
-    // listen for messages (new vehicle data sent from server)
+
     socket.addEventListener("message", handleWebSocketMessage);
   
     // sample fetching data from backend
