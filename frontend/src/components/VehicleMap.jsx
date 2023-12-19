@@ -39,41 +39,65 @@ fetch(apiUrl)
         console.error('There was a problem fetching the data:', error);
     });
 */
-function getbackend(start, end) {
-  let slat = start[0];
-  let slong = start[1];
-  let elat = end[0];
-  let elong = start[1];
-  const apiUrl =
-    "const apiUrl = `http://localhost:3232/algorithm?s_lat=${slat}&s_long=${slong}&e_lat=${elat}&e_long=${elong}&time=0`;";
+// async function getbackend(start, end) {
+//   let slat = start[0].toString();
+//   let slong = start[1].toString();
+//   let elat = end[0].toString();
+//   let elong = end[1].toString();
+//   const apiUrl ="http://localhost:3232/algorithm?s_lat="+slat+"&s_long="+slong+"&e_lat="+elat+"&e_long="+elong+"&time=0";
+//   console.log(apiUrl)
 
-  // Fetch data from the URL
+//   // Fetch data from the URL
 
-  fetch(apiUrl)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok.");
-      }
-      return response.json(); // Parse the JSON response
-    })
-    .then((data) => {
-      // Assuming the received data is in the format: { "start": [41.818824, -71.408827], "end": [41.818015, -71.406897] }
+//   fetch(apiUrl)
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error("Network response was not ok.");
+//       }
+//       return response.json(); // Parse the JSON response
+//     })
+//     .then((data) => {
+//       // Assuming the received data is in the format: { "start": [41.818824, -71.408827], "end": [41.818015, -71.406897] }
 
-      // Retrieve the start and end coordinates from the fetched JSON data
-      const startCoordinates = Array.isArray(data.start) ? data.start : [];
-      const endCoordinates = Array.isArray(data.end) ? data.end : [];
-      return [startCoordinates, endCoordinates];
+//       // Retrieve the start and end coordinates from the fetched JSON data
+//       console.log(data.start)
+//       const startCoordinates = data.start;
+//       const endCoordinates = data.end;
+//       console.log("STARTCOORD");
+//       console.log(startCoordinates);
+//       console.log("ENDCOORDS");
+//       console.log(endCoordinates);
+//       return [startCoordinates, endCoordinates];
 
-      // Process or use the retrieved coordinates as needed
-      console.log("Start Coordinates:");
-      printCoordinates(startCoordinates);
+//       // Process or use the retrieved coordinates as needed
+//       // console.log("Start Coordinates:");
+//       // printCoordinates(startCoordinates);
 
-      console.log("\nEnd Coordinates:");
-      printCoordinates(endCoordinates);
-    })
-    .catch((error) => {
-      console.error("There was a problem fetching the data:", error);
-    });
+//       // console.log("\nEnd Coordinates:");
+//       // printCoordinates(endCoordinates);
+//     })
+//     .catch((error) => {
+//       console.error("There was a problem fetching the data:", error);
+//     });
+// }
+async function getbackend(start, end) {
+  let slat = start[0].toString();
+  let slong = start[1].toString();
+  let elat = end[0].toString();
+  let elong = end[1].toString();
+  const url ="http://localhost:3232/algorithm?s_lat="+slat+"&s_long="+slong+"&e_lat="+elat+"&e_long="+elong+"&time=0";
+  console.log(url)
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log("DATAAAAA")
+    console.log(data)
+    return [data];
+  } catch (error) {
+    console.error(error);
+    return ["N/A", "N/A", "N/A"];
+  }
 }
 
 function VehicleMap() {
@@ -90,17 +114,11 @@ function VehicleMap() {
   };
   const [startCoordinates, setStartCoordinates] = useState([41.825331, -71.402523,]);
   const [endCoordinates, setEndCoordinates] = useState([41.825331, -71.402523,]);
-
-  const onCoordinatesSelect = ({ startingCoordinates, endingCoordinates }) => {
-    setStartCoordinates(startingCoordinates);
-    setEndCoordinates(endingCoordinates);
-    showRouteOnMap(startingCoordinates, endingCoordinates);
-  };
   
   let map;
   let customMarkers = [];
   let socket;
-
+  
   function showRouteOnMap(startCoords, endCoords) {
     const directionsService = new DirectionsService();
     const directionsRenderer = new DirectionsRenderer();
@@ -127,6 +145,21 @@ function VehicleMap() {
       }
     });
   }
+  const onCoordinatesSelect = ({ startingCoordinates, endingCoordinates }) => {
+    setStartCoordinates(startingCoordinates);
+    setEndCoordinates(endingCoordinates);
+    console.log("RESULT")
+    console.log(startingCoordinates)
+    console.log(endingCoordinates)
+    //const res = getbackend(startingCoordinates, endingCoordinates);
+    //{start=[41.818824, -71.408827], end=[41.818015, -71.406897]}
+    //console.log(res)
+    //[-71.403962, 41.8261575]
+    //VehicleMap.jsx:153 (2) [-71.396829, 41.820919]
+    showRouteOnMap(startingCoordinates, endingCoordinates)
+    // showRouteOnMap(startingCoordinates, [-71.408827, 41.818824])
+    // showRouteOnMap([-71.406897, 41.818015], endingCoordinates);
+  };
   
   const fetchFromBackend = async () => {
     getAllRoutes().then((result) => {
@@ -204,7 +237,7 @@ function VehicleMap() {
     setEndCoordinates(newEndCoordinates);
     
     // Call the function to display the route
-    showRouteOnMap(newStartCoordinates, newEndCoordinates);
+    //showRouteOnMap(newStartCoordinates, newEndCoordinates);
 
     if (Array.isArray(data.vehicles)) {
       data.vehicles.forEach((vehicle, index) => {
@@ -214,10 +247,10 @@ function VehicleMap() {
         };
         const heading = vehicle.heading;
 
-        console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
+        //console.log(`Vehicle ${vehicle.call_name} lat: ${position.lat} lng: ${position.lng} heading: ${heading}˚`);
       });
       
-      console.log(`Total vehicles: ${data.vehicles.length}`);
+      //console.log(`Total vehicles: ${data.vehicles.length}`);
 
       setVehicleData(data.vehicles);
 
@@ -274,13 +307,13 @@ function VehicleMap() {
 
       // print arrivals for each shuttle
       for (const shuttleCallName in arrivalsByShuttle) {
-        console.log(`Shuttle ${shuttleCallName}:`);
+        //console.log(`Shuttle ${shuttleCallName}:`);
         arrivalsByShuttle[shuttleCallName].forEach((arrival) => {
-          console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
+          //console.log(`  - Shuttle is ${arrival.distance} meters away from stop ${arrival.shuttleStopID} on route ${arrival.shuttleRouteID}, arriving in ${arrival.minutes} minutes and ${arrival.seconds} seconds.`);
         });
       }
 
-      console.log(`Total arrivals: ${count}`);
+      //console.log(`Total arrivals: ${count}`);
     } else {
       console.error(
         "Invalid data format. Expected an array under the 'arrivals' property."
@@ -357,10 +390,10 @@ function VehicleMap() {
     });
   }, [stopsData]);
   
-  useEffect(() => {
-    // Call the function to display the route
-    showRouteOnMap(startCoordinates, endCoordinates);
-  }, [startCoordinates, endCoordinates]);
+  // useEffect(() => {
+  //   // Call the function to display the route
+  //   showRouteOnMap(startCoordinates, endCoordinates);
+  // }, [startCoordinates, endCoordinates]);
   
 
   // useEffect(() => {
