@@ -6,80 +6,6 @@ import { getStopsByStopID, getStopsByRouteID } from "../fetch/RouteStopsList";
 import { ACCESS_TOKEN } from "../private/token.ts";
 import mapboxgl from "mapbox-gl";
 import AddressInput from "./AddressInput.jsx";
-/* 
-The first argument is the start lat and start long -> starting location (s_lat is your current position same for long)
-Second argument is the end lat and end long -> ending location (e_lat is your ending position and same for long)
-Leave 0 there 
-const apiUrl = 'http://localhost:3232/algorithm?s_lat=10.0&s_long=50.0&e_lat=-10.0&e_long=100.0&time=0'; 
-
-// Fetch data from the URL
-fetch(apiUrl)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok.');
-        }
-        return response.json(); // Parse the JSON response
-    })
-    .then(data => {
-        // Assuming the received data is in the format: { "start": [41.818824, -71.408827], "end": [41.818015, -71.406897] }
-        // start means the first shuttle stop (get onto)
-        // end means the last shuttle stop (get off on)
-        // Retrieve the start and end coordinates from the fetched JSON data
-        const startCoordinates: number[] = data.start || [];
-        const endCoordinates: number[] = data.end || [];
-
-        // Process or use the retrieved coordinates as needed
-        console.log("Start Coordinates:");
-        printCoordinates(startCoordinates);
-
-        console.log("\nEnd Coordinates:");
-        printCoordinates(endCoordinates);
-    })
-    .catch(error => {
-        console.error('There was a problem fetching the data:', error);
-    });
-*/
-// async function getbackend(start, end) {
-//   let slat = start[0].toString();
-//   let slong = start[1].toString();
-//   let elat = end[0].toString();
-//   let elong = end[1].toString();
-//   const apiUrl ="http://localhost:3232/algorithm?s_lat="+slat+"&s_long="+slong+"&e_lat="+elat+"&e_long="+elong+"&time=0";
-//   console.log(apiUrl)
-
-//   // Fetch data from the URL
-
-//   fetch(apiUrl)
-//     .then((response) => {
-//       if (!response.ok) {
-//         throw new Error("Network response was not ok.");
-//       }
-//       return response.json(); // Parse the JSON response
-//     })
-//     .then((data) => {
-//       // Assuming the received data is in the format: { "start": [41.818824, -71.408827], "end": [41.818015, -71.406897] }
-
-//       // Retrieve the start and end coordinates from the fetched JSON data
-//       console.log(data.start)
-//       const startCoordinates = data.start;
-//       const endCoordinates = data.end;
-//       console.log("STARTCOORD");
-//       console.log(startCoordinates);
-//       console.log("ENDCOORDS");
-//       console.log(endCoordinates);
-//       return [startCoordinates, endCoordinates];
-
-//       // Process or use the retrieved coordinates as needed
-//       // console.log("Start Coordinates:");
-//       // printCoordinates(startCoordinates);
-
-//       // console.log("\nEnd Coordinates:");
-//       // printCoordinates(endCoordinates);
-//     })
-//     .catch((error) => {
-//       console.error("There was a problem fetching the data:", error);
-//     });
-// }
 async function getbackend(start, end) {
   let slat = start[0].toString();
   let slong = start[1].toString();
@@ -91,12 +17,10 @@ async function getbackend(start, end) {
   try {
     const response = await fetch(url);
     const data = await response.json();
-    console.log("DATAAAAA")
     console.log(data)
-    return [data];
+    return [data.start, data.end];
   } catch (error) {
     console.error(error);
-    return ["N/A", "N/A", "N/A"];
   }
 }
 
@@ -148,17 +72,24 @@ function VehicleMap() {
   const onCoordinatesSelect = ({ startingCoordinates, endingCoordinates }) => {
     setStartCoordinates(startingCoordinates);
     setEndCoordinates(endingCoordinates);
-    console.log("RESULT")
-    console.log(startingCoordinates)
-    console.log(endingCoordinates)
-    //const res = getbackend(startingCoordinates, endingCoordinates);
-    //{start=[41.818824, -71.408827], end=[41.818015, -71.406897]}
-    //console.log(res)
-    //[-71.403962, 41.8261575]
-    //VehicleMap.jsx:153 (2) [-71.396829, 41.820919]
-    showRouteOnMap(startingCoordinates, endingCoordinates)
-    // showRouteOnMap(startingCoordinates, [-71.408827, 41.818824])
-    // showRouteOnMap([-71.406897, 41.818015], endingCoordinates);
+    console.log("RESULT");
+  
+    (async () => {
+      try {
+        const [startCoords, endCoords] = await getbackend(startingCoordinates, endingCoordinates);
+        console.log("Route data:", startCoords, endCoords);
+  
+        // Check if the response is valid before showing the route
+        if (startCoords.length === 2 && endCoords.length === 2) {
+          showRouteOnMap(startingCoordinates, startCoords);
+          showRouteOnMap(endCoords, endingCoordinates);
+        } else {
+          console.error("Invalid route data:", startCoords, endCoords);
+        }
+      } catch (error) {
+        console.error("Error fetching route data:", error);
+      }
+    })();
   };
   
   const fetchFromBackend = async () => {
